@@ -273,6 +273,276 @@ Para cada projeto refatorado, valide o seguinte checklist:
 
 > **Dica:** Se a skill não detectou problemas suficientes ou a refatoração falhou, ajuste os arquivos de referência e execute novamente. É normal precisar de 2-4 iterações.
 
+## Análise Manual dos Projetos
+
+### Projeto 1: code-smells-project (Python/Flask — API de E-commerce)
+
+#### [CRITICAL] Hardcoded Credentials com Fallback Inseguro
+- **Arquivo:** [app.py](app.py#L9)
+- **Linhas:** 9
+- **Problema:** `app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-key-keep-it-safe")` — embora use variável de ambiente, o fallback inseguro pode ser usado em produção se a env não estiver configurada, expondo credenciais
+- **Impacto:** Session hijacking, falsificação de tokens
+- **Classificação:** CRITICAL
+
+#### [CRITICAL] Consultas SQL em Loop (N+1 Query Problem)
+- **Arquivo:** [models.py](models.py#L98-L125)
+- **Linhas:** 98-125
+- **Problema:** Funções `get_pedidos_usuario()` e `get_todos_pedidos()` fazem queries por item dentro de loops aninhados
+- **Código:**
+  ```python
+  for row in rows:  # Loop 1
+      cursor_items = db.cursor()
+      cursor_items.execute("SELECT ... FROM itens_pedido WHERE pedido_id = ?", ...)  # Query N
+      for item in itens:  # Loop 2
+          ...
+  ```
+- **Impacto:** Degradação severa de performance com muitos pedidos; 1 query raiz + N queries por pedido (ex: 100 pedidos = 101 queries)
+- **Classificação:** CRITICAL
+
+#### [HIGH] Lógica de Negócio Desestruturada — Sem Camada Service
+- **Arquivo:** [models.py](models.py#L1-200) + [controllers.py](controllers.py#L1-200)
+- **Linhas:** Vários
+- **Problema:** Controllers chamam diretamente funções de models que fazem queries; não há Service Layer ou Repository Pattern. Lógica de desconto hardcoded em models.py:146-153
+- **Impacto:** Impossível testar Controller sem BD; mudanças em BD quebram Controllers
+- **Classificação:** HIGH
+
+#### [MEDIUM] Magic Numbers e Strings Sem Constantes
+- **Arquivo:** [models.py](models.py#L146-L153)
+- **Linhas:** 146-153
+- **Problema:** Descontos hardcoded (10%, 5%, 2%) e limiares (10000, 5000, 1000) sem constantes isoladas
+  ```python
+  if faturamento > 10000:
+      desconto = faturamento * 0.1
+  ```
+- **Impacto:** Difícil entender regra de negócio; mudanças devem ser feitas em múltiplos lugares
+- **Classificação:** MEDIUM
+
+#### [MEDIUM] Duplicação de Serialização de Dados
+- **Arquivo:** [controllers.py](controllers.py#L120-L160) + [models.py](models.py#L5-L8)
+- **Linhas:** Vários
+- **Problema:** Conversão `dict(row)` repetida em múltiplas funções; não há centralização de serialização
+- **Impacto:** Inconsistências na serialização; mudanças devem ser propagadas em N lugares
+- **Classificação:** MEDIUM
+
+#### [LOW] Status como Magic Strings
+- **Arquivo:** [controllers.py](controllers.py#L135) + [models.py](models.py#L160)
+- **Linhas:** Vários
+- **Problema:** Status de pedidos como strings simples ("pendente", "aprovado", "cancelado") sem enums ou constantes
+- **Impacto:** Erros de digitação; sem validação em tempo de compilação
+- **Classificação:** LOW
+
+#### [LOW] Inconsistência na Nomenclatura
+- **Arquivo:** [database.py](database.py#L1-80)
+- **Linhas:** Vários
+- **Problema:** Mistura de nomenclaturas: `get_db()`, `listar_produtos()` (português/inglês), `criar_pedido()`, `atualizar_status_pedido()`
+- **Impacto:** Dificuldade manutenção; base de código confusa
+- **Classificação:** LOW
+
+---
+
+### Projeto 2: ecommerce-api-legacy (Node.js/Express — LMS API com Checkout)
+
+#### [CRITICAL] Credenciais Sensíveis Hardcoded em Produção
+- **Arquivo:** [src/utils.js](src/utils.js#L1-L5)
+- **Linhas:** 1-5
+- **Problema:** Production API keys e senhas visíveis no código fonte:
+  ```javascript
+  dbUser: "admin_master",
+  dbPass: "senha_super_secreta_prod_123", 
+  paymentGatewayKey: "pk_live_1234567890abcdef",
+  ```
+- **Impacto:** Acesso não autorizado ao banco de dados e gateway de pagamento; exposição de dados sensíveis
+- **Classificação:** CRITICAL
+
+#### [CRITICAL] Criptografia Fraca (Non-Encryption)
+- **Arquivo:** [src/utils.js](src/utils.js#L19-L25)
+- **Linhas:** 19-25
+- **Problema:** Função `badCrypto()` não é criptografia — apenas concatenação de Base64:
+  ```javascript
+  function badCrypto(pwd) {
+      let hash = "";
+      for(let i = 0; i < 10000; i++) {
+          hash += Buffer.from(pwd).toString('base64').substring(0, 2);
+      }
+      return hash.substring(0, 10);
+  }
+  ```
+  Base64 é reversível e determinístico (mesmo password = mesmo hash sempre)
+- **Impacto:** Senhas não são seguras; atacante pode fazer força bruta facilmente
+- **Classificação:** CRITICAL
+
+#### [CRITICAL] Falta de Autenticação/Autorização em Endpoints Críticos
+- **Arquivo:** [src/AppManager.js](src/AppManager.js#L93-L120)
+- **Linhas:** 93-120
+- **Problema:** Endpoint `/api/admin/financial-report` sem proteção — qualquer pessoa pode acessar relatório financeiro
+- **Impacto:** Exposição de dados financeiros confidenciais; violação de confidencialidade
+- **Classificação:** CRITICAL
+
+#### [HIGH] Callback Hell com Tratamento de Erro Deficiente
+- **Arquivo:** [src/AppManager.js](src/AppManager.js#L20-L80)
+- **Linhas:** 20-80
+- **Problema:** Callbacks aninhados progressivamente (pyramid of doom) com error handling inadequado:
+  ```javascript
+  this.db.get(..., (err, user) => {
+      if (err) return ...;
+      let processPaymentAndEnroll = (userId) => {
+          this.db.run(..., function(err) {
+              if (err) return ...;
+              self.db.run(..., function(err) {
+                  if (err) return ...;
+                  // ... mais níveis
+              });
+          });
+      };
+  });
+  ```
+- **Impacto:** Impossível ler código; erros não propagam corretamente; testes complexos
+- **Classificação:** HIGH
+
+#### [HIGH] Lógica de Processamento de Pagamento Inline na Route Handler
+- **Arquivo:** [src/AppManager.js](src/AppManager.js#L20-L80)
+- **Linhas:** 20-80
+- **Problema:** Toda transformação de pagamento, criação de usuário, e lógica de matrícula dentro de `setupRoutes()` — sem Service Layer ou Controllers
+- **Impacto:** Impossível testar lógica de pagamento isoladamente; mudanças arriscadas; sem reutilização
+- **Classificação:** HIGH
+
+#### [MEDIUM] Estado Global Mutável
+- **Arquivo:** [src/utils.js](src/utils.js#L7-L8)
+- **Linhas:** 7-8
+- **Problema:** `globalCache` e `totalRevenue` são variáveis globais compartilhadas:
+  ```javascript
+  let globalCache = {};
+  let totalRevenue = 0;
+  ```
+- **Impacto:** Race conditions em concorrência; estado imprevisível; testes não-isolados
+- **Classificação:** MEDIUM
+
+#### [MEDIUM] Banco de Dados Em Memória (Não Persistente)
+- **Arquivo:** [src/AppManager.js](src/AppManager.js#L11)
+- **Linhas:** 11
+- **Problema:** `this.db = new sqlite3.Database(':memory:')` — banco de dados perde todos os dados ao reiniciar a aplicação
+- **Impacto:** Perda de dados; inadequado para produção; testes não realistas
+- **Classificação:** MEDIUM
+
+#### [LOW] Nomenclatura de Variáveis Abreviada
+- **Arquivo:** [src/AppManager.js](src/AppManager.js#L23-L25)
+- **Linhas:** 23-25
+- **Problema:** Variáveis com nomes cryptografados: `u`, `e`, `p`, `cid`, `cc`, `enrId`
+  ```javascript
+  let u = req.body.usr;      // username?
+  let e = req.body.eml;      // email?
+  let p = req.body.pwd;      // password?
+  let cid = req.body.c_id;   // course_id?
+  ```
+- **Impacto:** Reduz legibilidade; dificulta manutenção
+- **Classificação:** LOW
+
+#### [LOW] Magic Strings para Status
+- **Arquivo:** [src/AppManager.js](src/AppManager.js#L32)
+- **Linhas:** 32
+- **Problema:** Status de pagamento como strings simples ("PAID", "DENIED") sem constantes:
+  ```javascript
+  let status = cc.startsWith("4") ? "PAID" : "DENIED";
+  ```
+- **Impacto:** Erros de digitação; sem validação consistente
+- **Classificação:** LOW
+
+---
+
+### Projeto 3: task-manager-api (Python/Flask — API de Task Manager)
+
+#### [CRITICAL] Hashing de Senhas com MD5 (Deprecated)
+- **Arquivo:** [models/user.py](models/user.py#L23-L27)
+- **Linhas:** 23-27
+- **Problema:** MD5 é criptograficamente quebrado desde 1996. Implementação:
+  ```python
+  def set_password(self, pwd):
+      self.password = hashlib.md5(pwd.encode()).hexdigest()
+  ```
+- **Impacto:** Senhas podem ser quebradas com tabelas hash (rainbow tables); não seguro para produção
+- **Classificação:** CRITICAL
+
+#### [CRITICAL] Chave Secreta Hardcoded
+- **Arquivo:** [app.py](app.py#L12)
+- **Linhas:** 12
+- **Problema:** `app.config['SECRET_KEY'] = 'super-secret-key-123'` — hardcoded em produção
+- **Impacto:** Session hijacking; falsificação de CSRF tokens
+- **Classificação:** CRITICAL
+
+#### [HIGH] Credenciais de Email Hardcoded
+- **Arquivo:** [services/notification_service.py](services/notification_service.py#L8-L9)
+- **Linhas:** 8-9
+- **Problema:** Email e senha visíveis no código fonte:
+  ```python
+  self.email_user = 'taskmanager@gmail.com'
+  self.email_password = 'senha123'
+  ```
+- **Impacto:** Acesso não autorizado à conta de email; spam de e-mails
+- **Classificação:** HIGH
+
+#### [HIGH] Operação Síncrona de Email Dentro de Request Handler
+- **Arquivo:** [services/notification_service.py](services/notification_service.py#L12-L19)
+- **Linhas:** 12-19
+- **Problema:** `send_email()` bloqueia requisição HTTP enquanto envia email (`starttls()`, `login()`, `sendmail()`)
+- **Impacto:** Requisições lentas; timeout em rede lenta; má experiência do usuário
+- **Classificação:** HIGH
+
+#### [HIGH] Problema N+1 Query em Listagem de Tasks
+- **Arquivo:** [routes/task_routes.py](routes/task_routes.py#L12-L50)
+- **Linhas:** 12-50
+- **Problema:** Loop por tasks com queries individuais dentro do loop:
+  ```python
+  for t in tasks:  # Query 1: pega todas tasks
+      if t.user_id:
+          user = User.query.get(t.user_id)  # Query N+1
+      if t.category_id:
+          cat = Category.query.get(t.category_id)  # Query N+2
+  ```
+- **Impacto:** Performance degradada; 1 query raiz + 2N queries adicionais
+- **Classificação:** HIGH
+
+#### [MEDIUM] Duplicação de Lógica de Serialização
+- **Arquivo:** [models/task.py](models/task.py#L28-L40) vs [routes/task_routes.py](routes/task_routes.py#L12-L50)
+- **Linhas:** Vários
+- **Problema:** Mesma lógica `to_dict()` implementada em dois lugares:
+- **Impacto:** Manutenção duplicada; inconsistências de formato
+- **Classificação:** MEDIUM
+
+#### [MEDIUM] Falta de Validação em NotificationService
+- **Arquivo:** [services/notification_service.py](services/notification_service.py#L12-L20)
+- **Linhas:** 12-20
+- **Problema:** Não valida formato de email, se destinatário existe, etc. Apenas tenta enviar
+- **Impacto:** Emailsfalham silenciosamente; nenhuma retroação ao usuário
+- **Classificação:** MEDIUM
+
+#### [LOW] Handling de Exceção Genérica Demais
+- **Arquivo:** [services/notification_service.py](services/notification_service.py#L16)
+- **Linhas:** 16
+- **Problema:** `except Exception as e:` muito genérica — pega todas exceções sem distinção
+- **Impacto:** Difícil debugar; logs pouco informativos
+- **Classificação:** LOW
+
+#### [LOW] Magic Number para Campos de Texto
+- **Arquivo:** [models/task.py](models/task.py#L12)
+- **Linhas:** 12
+- **Problema:** `tags = db.Column(db.String(500), nullable=True)` — 500 é magic number sem constante
+- **Impacto:** Sem documentação do motivo da escolha
+- **Classificação:** LOW
+
+---
+
+## Resumo da Análise Manual
+
+| Projeto | CRITICAL | HIGH | MEDIUM | LOW | Total |
+|---------|----------|------|--------|-----|-------|
+| code-smells-project | 2 | 1 | 2 | 2 | **7** |
+| ecommerce-api-legacy | 3 | 2 | 3 | 2 | **10** |
+| task-manager-api | 2 | 3 | 3 | 2 | **10** |
+
+**Total de problemas identificados: 27**
+
+---
+
 ## Entregável
 
 Repositório público no GitHub (fork do repositório base) contendo:
