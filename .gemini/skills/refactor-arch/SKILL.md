@@ -332,6 +332,16 @@ After refactoring:
    - Seed data loaded
    - Queries execute without errors
 
+4. **Legacy Files Cleanup (MANDATORY)**
+   - When MVC structure is created in `src/`, old files are refactored/moved
+   - **Identify legacy files** that have been replaced:
+     - Python: `app.py`, `controllers.py`, `database.py`, `models.py` (in root)
+     - Node: `app.js`, `AppManager.js`, etc. (in root)
+   - **Delete legacy files** that were moved to `src/`
+   - **Delete empty folders** (e.g., `src/utils/` if only has `__init__.py`)
+   - **Verify no imports break** after removal
+   - **Re-test application boot** to confirm
+
 ### Output Format (EXACT)
 
 ```
@@ -386,9 +396,102 @@ Report saved to: reports/audit-project-1.md
 ================================
 ```
 
+### POST-REFACTORING: Legacy Files Cleanup (MANDATORY)
+
+**After refactoring is complete and validated, remove legacy files**
+
+#### Identify Files to Remove
+
+**Python/Flask Projects:**
+```
+Root directory (REMOVE):
+├── app.py                  ❌ Old entry point (moved to src/app.py)
+├── controllers.py          ❌ Old controllers (split to src/controllers/)
+├── database.py             ❌ Old DB config (moved to src/config/database.py)
+├── models.py               ❌ Old models (split to src/models/)
+```
+
+**Node/Express Projects:**
+```
+Root directory (REMOVE):
+├── app.js                  ❌ Old entry point (moved to src/app.js)
+├── AppManager.js           ❌ Old manager (refactored to src/)
+```
+
+**All Projects (REMOVE if empty):**
+```
+src/
+└── utils/                  ❌ Empty folder (only __init__.py or index.js)
+```
+
+#### Cleanup Commands
+
+**Python/Flask:**
+```bash
+# Navigate to project root
+cd code-smells-project
+
+# 1. Remove legacy files
+rm -f app.py controllers.py database.py models.py
+
+# 2. Remove empty utility folder
+rm -rf src/utils/
+
+# 3. Clean Python cache
+find . -type d -name __pycache__ -exec rm -r {} + 2>/dev/null || true
+
+# 4. Verify application still boots
+python -m src.app  # Should run without errors
+
+# 5. Test endpoints (in another terminal)
+curl http://localhost:5000/health
+curl http://localhost:5000/products
+```
+
+**Node/Express:**
+```bash
+# Navigate to project root
+cd ecommerce-api-legacy
+
+# 1. Remove legacy files
+rm -f app.js AppManager.js  # Adjust per project structure
+
+# 2. Remove empty utility folder
+rm -rf src/utils/
+
+# 3. Verify application still boots
+npm start  # Should run without errors
+
+# 4. Test endpoints (in another terminal)
+curl http://localhost:3000/health
+curl http://localhost:3000/api/products
+```
+
+#### Cleanup Checklist
+
+- [ ] **Identified** all legacy files that were refactored into `src/`
+- [ ] **Removed** legacy files from project root
+- [ ] **Removed** empty `src/utils/` folder (or any other empty folders)
+- [ ] **Re-tested** application boot: `python -m src.app` or `npm start`
+- [ ] **Verified** endpoints respond correctly after cleanup
+- [ ] **No error messages** in console during boot
+- [ ] **No import errors** in application
+
+#### If Cleanup Breaks the Application
+
+If application fails after cleanup:
+
+1. **Check imports** — Verify `src/app.py` imports from `src/config/`, `src/models/`, etc. (not from project root)
+2. **Restore deleted files** — Use `git checkout` to restore if you accidentally deleted needed code
+3. **Search for remaining imports** — Look for any remaining imports from old locations
+4. **Re-run validation** — Only proceed if application boots and endpoints work
+5. **Ask for confirmation** — Don't proceed with Phase 2 report until cleanup is verified
+
+---
+
 ### MANDATORY: Save Audit Report
 
-After Phase 3 completes, execute:
+After Phase 3 completes AND cleanup is verified, save the audit report:
 
 ```bash
 cp <phase2-audit-output> reports/audit-project-1.md
@@ -407,10 +510,15 @@ cp <phase2-audit-output> reports/audit-project-1.md
 ✓ **MUST** wait for user confirmation after Phase 2
 ✓ **MUST** find minimum findings distribution (1 CRITICAL/HIGH, 2 MEDIUM, 2 LOW)
 ✓ **MUST** create proper MVC folder structure in Phase 3
+✓ **MUST** clean up legacy files that were refactored into `src/`
+✓ **MUST** remove empty utility folders created by MVC template
+✓ **MUST** re-validate application boots after cleanup
+✓ **MUST** validate all endpoints still respond after cleanup
 ✓ **MUST** save audit report to `reports/audit-project-{N}.md`
-✓ **MUST** validate application boots and endpoints respond
 ✗ **MUST NOT** modify files before Phase 2 confirmation
 ✗ **MUST NOT** skip phases
+✗ **MUST NOT** leave legacy files in project root after refactoring
+✗ **MUST NOT** leave empty folders in `src/` after cleanup
 
 ---
 
@@ -432,3 +540,12 @@ If validation fails:
 - Check database initialization
 - Verify all imports work
 - Test endpoints with curl/Postman
+
+If cleanup breaks the application:
+- **DO NOT PROCEED** with next steps
+- **Check which imports failed** — some code may still be in old locations
+- **Verify all code is in `src/`** before deleting legacy files
+- **Restore files** via `git checkout <file>` if needed
+- **Only delete legacy files AFTER confirming** all code is refactored
+- **Re-run validation** to ensure application boots and endpoints respond
+- **Ask for human confirmation** before proceeding to save report
