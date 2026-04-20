@@ -126,6 +126,8 @@ Apply MVC architecture transformations, create proper folder structure, fix anti
 
 **See `references/mvc-guidelines.md` for complete MVC layer responsibilities and folder structure.**
 
+**IMPORTANT:** Only create `src/utils/` if you have actual helper or validator functions. Do NOT create empty utils folders.
+
 ### Apply Transformations
 
 For each anti-pattern found in Phase 2:
@@ -140,7 +142,8 @@ After refactoring, verify:
 1. **Application boots** without errors
 2. **Endpoints respond** with status 200/201
 3. **Database works** (tables created, queries execute)
-4. **No imports break** after removing legacy files
+4. **No import breaks** after removing legacy files
+5. **No empty `src/utils/` exists** (remove if present)
 
 ### Output Format
 
@@ -149,9 +152,9 @@ Print Phase 3 completion summary using the structure shown in references, includ
 - Transformations applied (with ✓ checkmarks)
 ### Legacy Files Cleanup
 
-After refactoring is validated:
+After refactoring is validated, REQUIRED cleanup:
 1. Remove legacy files (old root file moved to `src/`)
-2. Remove empty utility folders
+2. **Remove empty utility folder:** `src/utils/` if only contains `__init__.py` or `index.js`
 3. Re-validate that application still boots after cleanup
 
 ---
