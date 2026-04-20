@@ -300,6 +300,71 @@ MEDIUM
 
 ---
 
+## 11. Weak Cryptography / Insecure Hashing
+
+### Description
+
+Using cryptographically broken algorithms for password hashing or data encryption (MD5, SHA1, Base64).
+
+### Detection Signals
+
+* `hashlib.md5()` in Python
+* `Buffer.from(pwd).toString('base64')` in Node.js
+* `crypto.createHash('sha1')` anywhere
+* Non-salted hash functions
+* Custom encryption implementations
+
+### Severity
+
+CRITICAL
+
+### Impact
+
+* Password breach via rainbow tables
+* Hash collision attacks
+* System compromise
+* Compliance violations (GDPR, PCI-DSS)
+
+### Refactoring
+
+* Replace with bcrypt, argon2, or PBKDF2
+* Use library-provided functions, not custom crypto
+
+---
+
+## 12. Deprecated APIs
+
+### Description
+
+Using outdated or deprecated versions of libraries and APIs.
+
+### Detection Signals
+
+* Old import paths: `from flask.ext.sqlalchemy import`
+* Deprecated method calls
+* Old library versions in requirements/package.json
+* Warnings during package installation
+* Old middleware patterns
+
+### Severity
+
+HIGH
+
+### Impact
+
+* Security vulnerabilities (unpatched)
+* Missing bug fixes
+* Incompatibility with modern code
+* Performance issues
+
+### Refactoring
+
+* Update to current API: `from flask_sqlalchemy import`
+* Replace deprecated methods with modern equivalents
+* Update dependencies to latest stable versions
+
+---
+
 # 🟢 LOW ANTI-PATTERNS
 
 ---
