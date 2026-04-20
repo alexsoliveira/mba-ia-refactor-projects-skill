@@ -322,6 +322,262 @@ src/
 
 ---
 
+# 11. Callback Hell → Async/Await (Node.js/Express)
+
+## Sinais
+
+* Callbacks aninhados (pyramid of doom)
+* Error handling repetido em cada nível
+* Difícil rastrear fluxo de execução
+
+## Estratégia
+
+* Converter para async/await ou Promises
+* Centralizar error handling
+
+## Antes (Node.js)
+
+```javascript
+app.post('/enroll', (req, res) => {
+    db.get('SELECT * FROM users WHERE id = ?', req.body.userId, (err, user) => {
+        if (err) return res.status(500).json({error: err});
+        
+        db.run('INSERT INTO enrollments ...', (err) => {
+            if (err) return res.status(500).json({error: err});
+            
+            sendEmail(user.email, (err) => {
+                if (err) return res.status(500).json({error: err});
+                res.json({success: true});
+            });
+        });
+    });
+});
+```
+
+## Depois (Node.js)
+
+```javascript
+// controllers/enrollmentController.js
+async function enrollUser(userId) {
+    const user = await db.get('SELECT * FROM users WHERE id = ?', userId);
+    await db.run('INSERT INTO enrollments ...');
+    await sendEmail(user.email);
+    return {success: true};
+}
+
+// routes/enrollmentRoutes.js
+router.post('/enroll', async (req, res) => {
+    try {
+        const result = await enrollUser(req.body.userId);
+        res.json(result);
+    } catch(err) {
+        errorHandler(err, res);
+    }
+});
+```
+
+---
+
+# 12. Database Connection Inline → Persistent Connection (Node.js)
+
+## Sinais
+
+* Banco de dados em memória (`:memory:`)
+* Nova conexão por requisição
+* Sem pooling de conexões
+
+## Estratégia
+
+* Criar persistent database connection
+* Usar pool para múltiplas requisições
+* Externalizar configuração
+
+## Antes (Node.js)
+
+```javascript
+// app.js
+const sqlite3 = require('sqlite3');
+
+app.post('/users', (req, res) => {
+    const db = new sqlite3.Database(':memory:');  // ❌ Nova conexão a cada request!
+    db.run('INSERT INTO users ...', (err) => {
+        res.json({ok: true});
+    });
+});
+```
+
+## Depois (Node.js)
+
+```javascript
+// config/database.js
+const sqlite3 = require('sqlite3');
+const db = new sqlite3.Database('./app.db');  // ✅ Persistent, single instance
+
+module.exports = db;
+
+// controllers/userController.js
+const db = require('../config/database');
+
+async function createUser(data) {
+    return new Promise((resolve, reject) => {
+        db.run('INSERT INTO users ...', (err) => {
+            if(err) reject(err);
+            resolve({ok: true});
+        });
+    });
+}
+
+module.exports = { createUser };
+```
+
+---
+
+# 13. Route Handlers com Lógica Inline → Express Router Modularizado (Node.js)
+
+## Sinais
+
+* Todas as rotas em um único arquivo
+* app.get/app.post espalhado
+* Sem separação por domínio
+
+## Estratégia
+
+* Usar express.Router() para modularizar
+* Separar por domínio (users, products, orders)
+* Importar blueprints no app.js
+
+## Antes (Node.js)
+
+```javascript
+// app.js
+const express = require('express');
+const app = express();
+
+app.get('/users', (req, res) => { ... });
+app.post('/users', (req, res) => { ... });
+app.get('/products', (req, res) => { ... });
+app.post('/products', (req, res) => { ... });
+app.get('/orders', (req, res) => { ... });
+app.post('/orders', (req, res) => { ... });
+```
+
+## Depois (Node.js)
+
+```javascript
+// routes/userRoutes.js
+const express = require('express');
+const router = express.Router();
+const userController = require('../controllers/userController');
+
+router.get('/', userController.listUsers);
+router.post('/', userController.createUser);
+
+module.exports = router;
+
+// routes/productRoutes.js (similar structure)
+// routes/orderRoutes.js (similar structure)
+
+// app.js
+const express = require('express');
+const userRoutes = require('./routes/userRoutes');
+const productRoutes = require('./routes/productRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+
+const app = express();
+app.use('/users', userRoutes);
+app.use('/products', productRoutes);
+app.use('/orders', orderRoutes);
+```
+
+---
+
+# 14. Weak Cryptography → Bcrypt/Argon2
+
+## Sinais
+
+* MD5, SHA1, Base64 para senhas
+* Sem salt
+* Custom crypto implementations
+
+## Estratégia
+
+* Usar bcrypt ou argon2
+* Extrair para função centralizada
+
+## Antes (Python)
+
+```python
+import hashlib
+
+def set_password(self, pwd):
+    self.password = hashlib.md5(pwd.encode()).hexdigest()
+```
+
+## Depois (Python)
+
+```python
+import bcrypt
+
+def set_password(self, pwd):
+    salt = bcrypt.gensalt()
+    self.password = bcrypt.hashpw(pwd.encode(), salt).decode()
+```
+
+## Antes (Node.js)
+
+```javascript
+function badCrypto(pwd) {
+    let hash = "";
+    for(let i = 0; i < 10000; i++) {
+        hash += Buffer.from(pwd).toString('base64').substring(0, 2);
+    }
+    return hash.substring(0, 10);
+}
+```
+
+## Depois (Node.js)
+
+```javascript
+const bcrypt = require('bcrypt');
+
+async function hashPassword(pwd) {
+    const salt = await bcrypt.genSalt();
+    return await bcrypt.hash(pwd, salt);
+}
+```
+
+---
+
+# 15. Deprecated APIs → Modern Equivalents
+
+## Sinais
+
+* `from flask.ext.sqlalchemy` (deprecated)
+* Old middleware patterns
+* Obsolete library versions
+
+## Estratégia
+
+* Update imports
+* Use current API versions
+* Replace old patterns
+
+## Antes (Python/Flask)
+
+```python
+from flask.ext.sqlalchemy import SQLAlchemy  # ❌ Deprecated
+from flask.ext.cors import CORS              # ❌ Deprecated
+```
+
+## Depois (Python/Flask)
+
+```python
+from flask_sqlalchemy import SQLAlchemy  # ✅ Current
+from flask_cors import CORS              # ✅ Current
+```
+
+---
+
 # Regras Gerais de Refatoração
 
 * Nunca quebrar contratos de API existentes
