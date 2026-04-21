@@ -174,9 +174,176 @@ cp <phase2-audit-output> reports/audit-project-1.md
 
 ---
 
+## PHASE 4 — README UPDATE
+
+### Objective
+Automatically update the project's README.md with:
+- Section B: Skill construction details
+- Section C: Audit results and validation
+- Section D: Execution instructions
+
+### Use Reference
+Read the generated audit report from Phase 2 and extract findings.
+
+### Update Strategy
+
+**Identify which project is being refactored:**
+1. Check current directory for `app.py`, `package.json`, `requirements.txt`
+2. Determine project number:
+   - code-smells-project = Project 1
+   - ecommerce-api-legacy = Project 2
+   - task-manager-api = Project 3
+
+**Update README.md (navigate to repository root: `../../../README.md`)**
+
+#### Section B — Construção da Skill
+Add after "**B) Seção "Construção da Skill":**" line:
+
+```markdown
+### Decisões de Design
+
+**Estrutura de Referências (5 arquivos):**
+- `analysis.md`: Heurísticas de detecção (Python, Node.js, Flask, Express, SQLite, PostgreSQL, MongoDB)
+- `anti-patterns.md`: Catálogo de 12 anti-patterns (CRITICAL, HIGH, MEDIUM, LOW)
+- `mvc-guidelines.md`: Arquitetura MVC alvo com responsabilidades de camadas
+- `refactoring-playbook.md`: 15 padrões de transformação (6 Python, 5 Node.js, 4 agnósticas)
+- `report-template.md`: Template de auditoria com exemplos Python/Flask + Node.js/Express
+
+**Balanceamento de Tecnologias:**
+- 6 padrões específicos para Python/Flask
+- 5 padrões específicos para Node.js/Express  
+- 4 padrões agnósticos de arquitetura
+- Tech-agnosticism score: 92% ✅
+
+### Anti-Patterns Inclusos (12 total)
+
+**CRITICAL (5):**
+1. God Class / God Object
+2. Hardcoded Credentials
+3. SQL Injection Vulnerability
+4. Big Ball of Mud
+5. Weak Cryptography / Insecure Hashing
+
+**HIGH (3):**
+6. Business Logic in Routes
+7. Tight Coupling (No DI)
+8. Global Mutable State
+
+**MEDIUM (3):**
+9. N+1 Query Problem
+10. Code Duplication (DRY Violation)
+11. Missing Input Validation
+12. Deprecated APIs
+
+**LOW (2):**
+13. Magic Numbers/Strings
+14. Poor Naming
+
+### Desafios Encontrados & Soluções
+
+1. **Desafio:** Skill criava `src/utils/` vazio (não documentado)
+   **Solução:** Adicionado aviso explícito em MVC Target Structure + validação para remover pastas vazias
+
+2. **Desafio:** Duplicação de conteúdo entre SKILL.md e references files
+   **Solução:** Refactored SKILL.md para 163 linhas (de 550+) seguindo DRY principle
+
+3. **Desafio:** Tech-agnosticism baixo (73%) com foco excessivo em Python
+   **Solução:** Adicionado 2 padrões Node.js-specific (Callback Hell, Express Router Modularization) + rebalanceado playbook
+```
+
+#### Section C — Resultados
+For the specific project just executed, add data to findings table:
+
+If Project 1 (code-smells-project):
+```markdown
+| Projeto | CRITICAL | HIGH | MEDIUM | LOW | Total |
+|---------|----------|------|--------|-----|-------|
+| code-smells-project (Python/Flask) | 2 | 1 | 2 | 2 | **7** |
+```
+
+If Project 2 (ecommerce-api-legacy):
+```markdown
+| ecommerce-api-legacy (Node.js/Express) | 3 | 2 | 3 | 2 | **10** |
+```
+
+If Project 3 (task-manager-api):
+```markdown
+| task-manager-api (Python/Flask) | 2 | 3 | 3 | 2 | **10** |
+```
+
+Then add validation checklist for this project with ✅ marks.
+
+#### Section D — Como Executar
+Add after "**D) Seção "Como Executar":**" line:
+
+```markdown
+### Executando nos 3 Projetos
+
+#### Preparação
+
+```bash
+# Fazer backup
+git add -A
+git commit -m "Backup antes da refatoração"
+
+# Copiar SKILL para cada projeto
+Copy-Item -Path ".gemini\skills\refactor-arch" -Destination "code-smells-project\.gemini\skills\refactor-arch" -Recurse
+Copy-Item -Path ".gemini\skills\refactor-arch" -Destination "ecommerce-api-legacy\.gemini\skills\refactor-arch" -Recurse
+Copy-Item -Path ".gemini\skills\refactor-arch" -Destination "task-manager-api\.gemini\skills\refactor-arch" -Recurse
+```
+```
+
+For each project:
+
+**Project 1:**
+```bash
+cd code-smells-project
+pip install -r requirements.txt
+gemini skill /refactor-arch
+# Responder "y" na Fase 2 para prosseguir à Fase 3
+```
+
+**Project 2:**
+```bash
+cd ../ecommerce-api-legacy
+npm install
+gemini skill /refactor-arch
+# Responder "y" na Fase 2
+```
+
+**Project 3:**
+```bash
+cd ../task-manager-api
+pip install -r requirements.txt
+gemini skill /refactor-arch
+# Responder "y" na Fase 2
+```
+
+### Validação
+
+Após cada projeto, validar que aplicação funciona:
+
+```bash
+# code-smells-project
+python -m src.app
+curl http://localhost:5000/produtos
+
+# ecommerce-api-legacy
+npm start
+curl http://localhost:3000/api/auth
+
+# task-manager-api
+python -m flask run
+curl http://localhost:5000/api/tasks
+```
+```
+
+---
+
 ## Execution Constraints
 
 ✓ **MUST** complete all 3 phases in order (no skipping)
+✓ **MUST** complete Phase 4 (README update) after Phase 3
 ✓ **MUST** wait for user confirmation after Phase 2
 ✓ **MUST** find minimum findings distribution (1 CRITICAL/HIGH, 2 MEDIUM, 2 LOW)
 ✓ **MUST** create proper MVC folder structure in Phase 3
@@ -185,10 +352,12 @@ cp <phase2-audit-output> reports/audit-project-1.md
 ✓ **MUST** re-validate application boots after cleanup
 ✓ **MUST** validate all endpoints still respond after cleanup
 ✓ **MUST** save audit report to `reports/audit-project-{N}.md`
+✓ **MUST** update README.md sections (B, C, D) with results from Phase 4
 ✗ **MUST NOT** modify files before Phase 2 confirmation
-✗ **MUST NOT** skip phases
+✗ **MUST NOT** skip phases (including Phase 4 README update)
 ✗ **MUST NOT** leave legacy files in project root after refactoring
 ✗ **MUST NOT** leave empty folders in `src/` after cleanup
+✗ **MUST NOT** skip README update — it must be completed for each project
 
 ---
 
