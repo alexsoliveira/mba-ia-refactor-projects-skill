@@ -46,8 +46,214 @@ Your task has 3 mandatory phases. You MUST execute them in this exact order:
 - ❌ NO COMBINING PHASES (1 → STOP → 2 → STOP → 3 sequence)
 - ❌ NO ACCEPTING PHASE 3 WITHOUT USER CONFIRMATION
 - ❌ NO LOW FINDINGS < 2 (MUST find at least 2 LOW severity findings)
+- ❌ NO ASCII ART TABLES (no ┌──┐, ├──┤, └──┘ characters)
 - ✓ EXACT TEMPLATES ONLY (use provided format, substitute only values)
 - ✓ WAIT for user confirmation before proceeding between phases
+
+---
+
+## 🎯 ABSOLUTELY LITERAL OUTPUT EXAMPLES
+
+**Look at these EXACT examples below. Your output MUST look EXACTLY like this (only substituting values).**
+
+### EXAMPLE PHASE 1 OUTPUT (COPY THIS STRUCTURE EXACTLY):
+
+```
+================================
+PHASE 1: PROJECT ANALYSIS
+================================
+
+Language:       Python
+Framework:      Flask 3.1.1
+Dependencies:   flask, flask-cors
+Architecture:   Partially Structured Monolith
+Domain:         E-commerce API (Produtos, Usuários, Pedidos)
+Database:       SQLite (loja.db)
+Source Files:   4
+LOC Estimate:   ~700
+Maturity:       Level 1 (Monolith)
+
+Key Entities:
+  - Models: Produto, Usuario, Pedido, Item_Pedido
+  - Routes: GET /produtos, POST /usuarios, POST /pedidos
+  - Tables: produtos, usuarios, pedidos, itens_pedido
+
+================================
+```
+
+**This is what Phase 1 output MUST look like. No descriptions, no paragraphs, no bullets before each item.**
+
+---
+
+### EXAMPLE PHASE 2 OUTPUT (COPY THIS STRUCTURE EXACTLY):
+
+```
+================================
+ARCHITECTURE AUDIT REPORT
+================================
+
+Project: code-smells-project
+Stack:   Python + Flask 3.1.1
+Files:   4 analyzed | ~700 LOC total
+
+## Summary
+
+| Severity | Count |
+|----------|-------|
+| CRITICAL | 2     |
+| HIGH     | 1     |
+| MEDIUM   | 2     |
+| LOW      | 2     |
+
+**Total Findings: 7**
+
+---
+
+## Findings
+
+### [CRITICAL] Hardcoded Credentials
+
+File: app.py, Line: 9
+
+app.config["SECRET_KEY"] = "dev-key-keep-it-safe"
+
+Impact: Session hijacking, token forgery, production at risk
+
+---
+
+### [CRITICAL] N+1 Query Problem
+
+File: models.py, Lines: 98-125
+
+for row in rows:
+    cursor_items = db.cursor()
+    cursor_items.execute("SELECT ... FROM itens_pedido WHERE pedido_id = ?")
+
+Impact: Severe performance degradation with 100 orders = 101 queries
+
+---
+
+### [HIGH] Business Logic in Models
+
+File: models.py, controllers.py
+
+Mixed business logic and data access, no service layer
+
+Impact: Untestable code, tightly coupled layers
+
+---
+
+### [MEDIUM] Magic Numbers
+
+File: models.py, Lines: 146-153
+
+if faturamento > 10000:
+    desconto = faturamento * 0.1
+
+Impact: Hardcoded discount rates without reusable constants
+
+---
+
+### [MEDIUM] Code Duplication
+
+File: controllers.py, models.py
+
+Row-to-dict conversion repeated in multiple functions
+
+Impact: Inconsistent serialization across endpoints
+
+---
+
+### [LOW] Magic Strings for Status
+
+File: models.py, controllers.py
+
+status = "pendente"  # repeated without constants
+
+Impact: Typo risk, no validation
+
+---
+
+### [LOW] Inconsistent Naming
+
+File: database.py
+
+Mix of Portuguese/English: get_db(), listar_produtos(), criar_pedido()
+
+Impact: Confusing codebase
+
+---
+
+================================
+PHASE 2 COMPLETE
+================================
+
+Total Findings: 7
+  - CRITICAL: 2
+  - HIGH: 1
+  - MEDIUM: 2
+  - LOW: 2
+
+Proceed with refactoring (Phase 3)? [y/n]
+```
+
+**This is what Phase 2 MUST look like:**
+- ✓ Markdown table for summary (not ASCII art with ┌──┐)
+- ✓ Each finding has [SEVERITY], File:Line, Code, Impact
+- ✓ Findings sorted: CRITICAL → HIGH → MEDIUM → LOW
+- ✓ 2 LOW findings included (required)
+- ✓ Ends with STOP (waiting for user confirmation)
+
+---
+
+## ⚠️ COMMON MISTAKES (DO NOT REPEAT THESE)
+
+**MISTAKE 1 - Phase 1 in Paragraph Format**
+
+❌ WRONG:
+```
+Phase 1: Analysis Summary
+ - Language: Python
+ - Framework: Flask (3.1.1)
+ - Architecture: Monolithic and tightly coupled...
+```
+
+✓ CORRECT:
+```
+================================
+PHASE 1: PROJECT ANALYSIS
+================================
+
+Language:       Python
+Framework:      Flask 3.1.1
+...
+```
+
+**MISTAKE 2 - Phase 2 with ASCII Tabels**
+
+❌ WRONG:
+```
+┌──────────┬───────────────────────┐
+│ Severity │ Issue                 │
+├──────────┼───────────────────────┤
+│ CRITICAL │ SQL Injection         │
+```
+
+✓ CORRECT:
+```
+| Severity | Count |
+|----------|-------|
+| CRITICAL | 2     |
+
+### [CRITICAL] SQL Injection
+File: app.py, Line: 59
+...
+```
+
+**MISTAKE 3 - Not Finding 2 LOW Findings**
+
+❌ WRONG: Only finding CRITICAL and HIGH (0-1 LOW findings)
+✓ CORRECT: Finding at least 2 LOW findings (magic strings, magic numbers, bad naming, etc.)
 - ✓ Each finding must follow exact structure (no bullet points, no summaries)
 
 ---
@@ -123,10 +329,11 @@ Key Entities:
 ================================
 ```
 
-**CRITICAL:** 
+**IMPORTANT:** 
 - Print EXACTLY this format
 - Do NOT add emojis, descriptions, or explanations
 - Do NOT add comments or markdown formatting
+- Do NOT use paragraphs or bullet points (like "- Language: Python" or "Language: Python")
 - Just the facts in plain text structure
 - Do NOT proceed to Phase 2 until this is fully printed
 
@@ -136,10 +343,20 @@ Key Entities:
 
 ### ⚠️ CRITICAL: This phase is SECOND and ONLY executes after Phase 1 is fully printed.
 
+### ⚠️ CRITICAL REMINDER: After Phase 2, YOU MUST STOP and wait for user confirmation. Do NOT continue to Phase 3.
+
 BEFORE YOU DO ANYTHING:
 1. Check if Phase 1 is already printed
 2. If NO → Print Phase 1 first (never start with Phase 2!)
 3. If YES → Proceed with Phase 2 audit
+
+### After Phase 2 is printed, you MUST:
+1. Include the confirmation prompt: `Proceed with refactoring (Phase 3)? [y/n]`
+2. STOP and WAIT for user input
+3. Do NOT propose Phase 3 refactoring plan
+4. Do NOT describe how you would refactor
+5. Do NOT ask "Would you like me to proceed?" more than once
+6. WAIT for explicit "y" or "yes" response before continuing
 
 ### Objective
 Detect anti-patterns, classify by severity, generate structured audit report using EXACT template format.
@@ -156,16 +373,42 @@ Detect anti-patterns, classify by severity, generate structured audit report usi
 - ✓ 1-2 CRITICAL findings
 - ✓ 1-2 HIGH findings  
 - ✓ 2 MEDIUM findings
-- ✓ **2 LOW findings (NOT 1, NOT 0 — MUST BE 2)**
+- ✓ **2 LOW findings (NOT 1, NOT 0 — MUST BE EXACTLY 2 OR MORE)**
 
-If you find < 2 LOW findings, KEEP SEARCHING until you find 2 LOW severity findings.
+**⚠️ CRITICAL REMINDER ON LOW FINDINGS:**
 
-**Examples of LOW severity findings to search for:**
-- Magic strings (hardcoded status strings like "pendente", "aprovado" without constants)
-- Magic numbers (hardcoded values like `1000`, `10`, `5` without named constants)
-- Poor naming conventions (abbreviations, inconsistent naming between Portuguese/English)
-- Unnecessary catch-all exception handlers (`except Exception as e`)
-- Unused or poorly organized imports
+You MUST find 2 LOW severity findings. This is not a suggestion, it's a requirement.
+
+If you have found < 2 LOW findings, STOP and keep searching until you find exactly 2.
+
+**Common LOW severity findings to search for (Examples from code-smells-project):**
+
+1. **Magic Strings for Status** (code-smells-project example)
+   - File: models.py, controllers.py
+   - Pattern: `status = "pendente"` or `"aprovado"` hardcoded multiple times
+   - Problem: No constants, typo risk, no validation
+   
+2. **Magic Numbers for Business Rules** (code-smells-project example)
+   - File: models.py, Lines: 146-153
+   - Pattern: `if faturamento > 10000:` and `desconto = faturamento * 0.1`
+   - Problem: Discount rates (10%, 5%, 2%) hardcoded without named constants
+   
+3. **Inconsistent Naming Convention** (code-smells-project example)
+   - File: database.py, controllers.py
+   - Pattern: Mix of Portuguese/English: `get_db()`, `listar_produtos()`, `criar_pedido()`
+   - Problem: Confusing naming, no consistency
+
+4. **Poor Exception Handling** (Generic pattern)
+   - File: controllers.py
+   - Pattern: `except Exception as e:` catching all exceptions
+   - Problem: No specific error types, loses debugging information
+
+5. **Code Duplication** (code-smells-project example)
+   - File: controllers.py, models.py
+   - Pattern: `dict(row)` serialization logic repeated in multiple places
+   - Problem: Maintenance burden, inconsistent formats
+
+**If you can't find LOW findings using these examples, you must search harder. Do not proceed with Phase 2 output if you have < 2 LOW findings.**
 
 **Detection Strategy (COMPREHENSIVE SEARCH):**
 
@@ -182,13 +425,17 @@ If you find < 2 LOW findings, KEEP SEARCHING until you find 2 LOW severity findi
    - No dependency injection: Direct instantiation of objects
    - Global mutable state: Shared variables across modules
 
-3. **MEDIUM Anti-Patterns** — Search for:
+3. **MEDIUM Anti-Patterns (MUST FIND AT LEAST 2)** — Search for:
    - N+1 queries: `for row in rows:` followed by DB queries inside loop
    - Code duplication: Same `dict(row)`, serialization, or logic repeated in multiple files
    - Missing input validation: No schema/validator middleware on routes
    - Magic numbers: Hardcoded values like `10`, `5`, `1000` without constants
-
-4. **LOW Anti-Patterns (MUST FIND 2)** — Search for:
+   
+   **Examples from code-smells-project:**
+   - Magic numbers in models.py line 146: `if faturamento > 10000:` and `desconto = faturamento * 0.1`
+   - Code duplication: `dict(row)` conversion in both controllers.py and models.py
+   
+4. **LOW Anti-Patterns (MUST FIND AT LEAST 2)** — Search for:
    - Magic strings: Hardcoded status values like `"pendente"`, `"aprovado"` repeated in code
    - Poor naming: Inconsistent function naming (mix of Portuguese/English, abbreviations)
    - Inconsistent conventions: Different naming styles across modules
@@ -266,16 +513,28 @@ Follow `references/report-template.md` EXACTLY. Your report MUST have:
 8. ❌ Put descriptions in bullet format instead of structured [SEVERITY] format
 9. ❌ Skip the confirmation prompt at the end
 10. ❌ Suggest refactoring actions in Phase 2 (Phase 2 is AUDIT ONLY, Phase 3 is REFACTORING)
+11. ❌ **USE ASCII ART TABLES** (no ┌──┐, ├──┤, │, ┘, └ characters) — Use Markdown tables instead
+12. ❌ Only print Phase 1 as paragraphs or bullet points (must use EXACT template format)
 
-### IMPORTANT VALIDATIONS (CHECK BEFORE PRINTING)
+### PRE-OUTPUT VALIDATION CHECKLIST (VERIFY ALL BEFORE PRINTING PHASE 2)
 
-- ✓ NO EMOJIS anywhere (check entire output)
-- ✓ Findings MUST be sorted: CRITICAL first, then HIGH, then MEDIUM, then LOW
-- ✓ EACH finding MUST have: [SEVERITY], File:Line, Code example, Impact, then ---
-- ✓ MUST have Summary Table (not bullet points)
-- ✓ MUST include footer with confirmation prompt
-- ✓ MUST have at least 5 findings
-- ✓ MUST have at least 2 LOW findings (NOT 1, NOT 0)
+**Before you print Phase 2 output, check this list:**
+
+- [ ] Does my Phase 1 output match the LITERAL EXAMPLE above? (structure line-by-line?)
+- [ ] Do I have exactly 5 or more total findings?
+- [ ] Do I have at least 1-2 CRITICAL findings?
+- [ ] Do I have at least 1-2 HIGH findings?
+- [ ] Do I have at least 2 MEDIUM findings?
+- [ ] Do I have at least 2 LOW findings? (If NOT, STOP and find more before proceeding)
+- [ ] Have I used ZERO emojis in my entire output?
+- [ ] Have I used ZERO ASCII art tables (no ┌──┐)?
+- [ ] Is my summary table in Markdown format (| Severity | Count |)?
+- [ ] Does each finding have the structure: ### [SEVERITY] Title, File: ..., Code, Impact, ---?
+- [ ] Are my findings sorted: CRITICAL → HIGH → MEDIUM → LOW?
+- [ ] Does my Phase 2 output end with the STOP confirmation prompt?
+- [ ] Am I waiting for user confirmation before proceeding to Phase 3?
+
+**If ANY checkbox is unchecked, FIX IT before printing output.**
 
 ### POST-AUDIT: MANDATORY STOP
 
