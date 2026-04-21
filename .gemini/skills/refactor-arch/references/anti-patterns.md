@@ -12,7 +12,7 @@ Each anti-pattern includes:
 
 ---
 
-# 🔴 CRITICAL ANTI-PATTERNS
+# CRITICAL ANTI-PATTERNS
 
 ---
 
@@ -135,7 +135,7 @@ CRITICAL
 
 ---
 
-# 🟠 HIGH ANTI-PATTERNS
+# HIGH ANTI-PATTERNS
 
 ---
 
@@ -219,7 +219,7 @@ HIGH
 
 ---
 
-# 🟡 MEDIUM ANTI-PATTERNS
+# MEDIUM ANTI-PATTERNS
 
 ---
 
@@ -365,7 +365,7 @@ HIGH
 
 ---
 
-# 🟢 LOW ANTI-PATTERNS
+# LOW ANTI-PATTERNS
 
 ---
 
@@ -454,11 +454,11 @@ This section provides concrete code patterns to detect anti-patterns in Python/F
 Search for hardcoded numeric or status values without constants:
 
 ```python
-# ❌ BAD - Magic number without context
+# BAD - Magic number without context
 if faturamento > 10000:
     desconto = faturamento * 0.1
 
-# ❌ BAD - Magic string status (repeated multiple times)
+# BAD - Magic string status (repeated multiple times)
 status = "pendente"
 cursor.execute("SELECT COUNT(*) FROM pedidos WHERE status = 'pendente'")
 if novo_status == "aprovado":
@@ -480,7 +480,7 @@ if novo_status == "aprovado":
 Search for repeated logic across files:
 
 ```python
-# ❌ In models.py
+# In models.py
 for row in rows:
     result.append({
         "id": row["id"],
@@ -488,7 +488,7 @@ for row in rows:
         "email": row["email"],
     })
 
-# ❌ In controllers.py (same logic repeated)
+# In controllers.py (same logic repeated)
 for row in rows:
     result.append({
         "id": row["id"],
@@ -513,7 +513,7 @@ for row in rows:
 Search for naming inconsistencies:
 
 ```python
-# ❌ Bad - Mix Portuguese/English
+# Bad - Mix Portuguese/English
 def listar_produtos():  # Portuguese
     pass
 
@@ -539,7 +539,7 @@ def buscar_pedidos(usuario_id):  # Portuguese
 Search for database queries inside loops:
 
 ```python
-# ❌ BAD - N+1 Query
+# BAD - N+1 Query
 cursor.execute("SELECT * FROM pedidos WHERE usuario_id = ?")  # Query 1
 rows = cursor.fetchall()
 for row in rows:  # Loop
@@ -580,7 +580,7 @@ The agent MUST:
 
 ---
 
-# 🧠 Final Rule
+# Final Rule
 
 Detection must be:
 
@@ -589,5 +589,5 @@ Detection must be:
 * Actionable
 
 Avoid generic statements like:
-❌ "code is bad"
+AVOID: "code is bad"
 ✔ "query inside loop at file X line Y"
