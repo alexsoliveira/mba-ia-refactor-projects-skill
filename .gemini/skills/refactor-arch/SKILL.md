@@ -12,20 +12,47 @@ user-invocable: true
 disable-model-invocation: false
 ---
 
+# ⚡ IMPERATIVE INSTRUCTIONS FOR GEMINI (FOLLOW EXACTLY)
+
+**DO NOT DEVIATE FROM THIS WORKFLOW:**
+
+1. **PHASE 1 NOW** → Analyze project → Output EXACT template format → NO emojis, descriptions, or extras
+2. **THEN PHASE 2** → Audit code → Find ≥5 findings → Output EXACT template format → NO emojis, descriptions, or extras
+3. **THEN WAIT** → Print confirmation prompt: `Proceed with refactoring (Phase 3)? [y/n]` → STOP and wait for user input
+4. **IF USER SAYS YES** → THEN PHASE 3 → Refactor → Validate → Save report to `reports/audit-project-N.md`
+5. **IF USER SAYS NO** → STOP. Do NOT refactor.
+
+**CRITICAL RULES (ZERO TOLERANCE):**
+- ❌ NO emojis, symbols, or icons anywhere
+- ❌ NO combining phases (1+2+3 together)
+- ❌ NO skipping to Phase 3 without user confirmation
+- ❌ NO deviations from template format
+- ✓ Use EXACT template structure for Phase 1 and Phase 2 outputs
+- ✓ Each finding MUST have: [SEVERITY], File:Line, Code example, Impact
+- ✓ Each phase MUST complete before next phase begins
+
+---
+
 # Refactor Architecture Skill (MVC Automation)
 
 ## Overview
 
 This skill performs a **3-phase automated refactoring workflow** to transform any backend codebase into a clean MVC architecture.
 
-**CRITICAL REQUIREMENTS:**
-- Phase 1: Analyze and report stack correctly
-- Phase 2: Generate structured audit report with MINIMUM 5 findings (≥1 CRITICAL/HIGH, ≥2 MEDIUM, ≥2 LOW) + Summary table
-- Phase 3: Create proper MVC structure and save audit report to `reports/audit-project-{N}.md`
+**CRITICAL REQUIREMENTS — FOLLOW EXACTLY:**
+- **Sequence:** PHASE 1 FIRST → PHASE 2 SECOND → Wait for confirmation → PHASE 3 THIRD
+- Phase 1: MUST execute first. Analyze and report stack using EXACT template format (see below)
+- Phase 2: Generate structured audit report with MINIMUM 5 findings using EXACT template format
+- Phase 3: Create proper MVC structure ONLY after user confirms Phase 2
+- NO EMOJIS in output (use plain text only)
+- NO deviations from template format
+- Wait for user confirmation before any phase transition
 
 ---
 
-## PHASE 1 — PROJECT ANALYSIS
+## PHASE 1 — PROJECT ANALYSIS (DO THIS FIRST)
+
+### ⚠️ CRITICAL: This phase MUST execute FIRST, before anything else
 
 ### Objective
 Detect programming language, framework, architecture type, domain, database, and project maturity.
@@ -33,7 +60,7 @@ Detect programming language, framework, architecture type, domain, database, and
 ### Use Reference
 Load `references/analysis.md` for detection heuristics.
 
-### Minimum Detections
+### Minimum Detections (DETECT ALL)
 1. **Language:** Python, Node.js, etc.
 2. **Framework:** Flask, Django, Express, etc.
 3. **Dependencies:** List top 3-5
@@ -45,7 +72,8 @@ Load `references/analysis.md` for detection heuristics.
 9. **Project Maturity:** Level 1 (Monolith) | Level 2 (Partial) | Level 3 (Layered)
 10. **Key Entities:** Models/Tables identified
 
-### Output Format (EXACT)
+### Output Format (USE EXACTLY THIS TEMPLATE — NO CHANGES, NO EMOJIS)
+
 ```
 ================================
 PHASE 1: PROJECT ANALYSIS
@@ -69,16 +97,20 @@ Key Entities:
 ================================
 ```
 
+**IMPORTANT:** Print EXACTLY this format. Do NOT add emojis, descriptions, or explanations. Just the facts in this structure.
+
 ---
 
-## PHASE 2 — ARCHITECTURE AUDIT
+## PHASE 2 — ARCHITECTURE AUDIT (AFTER PHASE 1 COMPLETES)
+
+### ⚠️ CRITICAL: This phase is SECOND. Do NOT combine with Phase 1.
 
 ### Objective
-Detect anti-patterns, classify by severity, generate structured audit report.
+Detect anti-patterns, classify by severity, generate structured audit report using EXACT template format.
 
 ### Use References
 - `references/anti-patterns.md` - Anti-pattern catalog with detection signals and examples
-- `references/report-template.md` - Report format template
+- `references/report-template.md` - Report format template (FOLLOW EXACTLY)
 
 ### MANDATORY REQUIREMENTS FOR PHASE 2
 
@@ -110,40 +142,98 @@ Detect anti-patterns, classify by severity, generate structured audit report.
    - Poor naming: Inconsistent function naming (mix of Portuguese/English, abbreviations)
    - Inconsistent conventions: Different naming styles across modules
 
-**Report Format:** Follow `references/report-template.md` for exact structure:
-- File + line numbers for each finding
-- Code example (3-5 lines)
-- Impact + Recommendation for each
-- Summary table with severity distribution
-- Sorted by severity (CRITICAL → LOW)
-- Must include at least: 1-2 CRITICAL, 1 HIGH, 2 MEDIUM, 2 LOW
+### Report Format — USE EXACT TEMPLATE (NO EMOJIS, NO DEVIATIONS)
 
-### POST-AUDIT MANDATORY STOP
+Follow `references/report-template.md` EXACTLY. Your report MUST have:
 
-After report output, print:
+1. **Header section** with:
+   - `================================`
+   - `ARCHITECTURE AUDIT REPORT`
+   - Project name, stack info, file count
+   - `================================`
 
-```
-================================
-PHASE 2 COMPLETE
-================================
+2. **Summary Table** (REQUIRED) with this exact format:
+   ```
+   | Severity | Count |
+   |----------|-------|
+   | CRITICAL | N     |
+   | HIGH     | N     |
+   | MEDIUM   | N     |
+   | LOW      | N     |
+   
+   **Total Findings: N**
+   ```
 
-Total Findings: 7
-  - CRITICAL: 2
-  - HIGH: 1
-  - MEDIUM: 2
-  - LOW: 2
+3. **Findings Section** with EACH finding having:
+   - **Header:** `### [SEVERITY] Finding Title`
+   - **File line:** `File: filename, Line(s): N-M`
+   - **Code example:** 3-5 lines of actual code showing the problem
+   - **Impact:** Single sentence describing business/security impact
+   - **Separator:** `---` (between findings)
 
-Proceed with refactoring (Phase 3)? [y/n]
-```
+4. **Example format for ONE finding:**
+   ```
+   ### [CRITICAL] Hardcoded Credentials
 
-**WAIT FOR USER CONFIRMATION BEFORE PROCEEDING TO PHASE 3**
+   File: app.py, Line: 9
+
+   app.config["SECRET_KEY"] = "dev-key-keep-it-safe"
+
+   Impact: Session hijacking, token forgery, production at risk
+
+   ---
+   ```
+
+5. **Footer** (MANDATORY) with this exact format:
+   ```
+   ================================
+   PHASE 2 COMPLETE
+   ================================
+
+   Total Findings: N
+     - CRITICAL: N
+     - HIGH: N
+     - MEDIUM: N
+     - LOW: N
+
+   Proceed with refactoring (Phase 3)? [y/n]
+   ```
+
+### IMPORTANT VALIDATIONS
+
+- ✓ NO EMOJIS anywhere (remove 🚨, ✓, *, etc.)
+- ✓ Findings MUST be sorted: CRITICAL first, then HIGH, then MEDIUM, then LOW
+- ✓ EACH finding MUST have: [SEVERITY], File:Line, Code example, Impact
+- ✓ MUST have Summary Table (not bullet points)
+- ✓ MUST include footer with confirmation prompt
+- ✓ MUST have at least 5 findings (≥1 CRITICAL/HIGH, ≥2 MEDIUM, ≥2 LOW)
+
+### POST-AUDIT: WAIT FOR CONFIRMATION
+
+Print the confirmation prompt and STOP. Do NOT proceed to Phase 3 until user confirms with "y" or "yes".
+
+If user confirms:
+- Acknowledge confirmation
+- Proceed to PHASE 3
+- Save the audit report you just printed to `reports/audit-project-N.md`
+
+If user declines (n/no):
+- Stop here. Do not refactor.
+- Offer to adjust detection and re-run Phase 2.
 
 ---
 
-## PHASE 3 — REFACTORING
+## PHASE 3 — REFACTORING (ONLY AFTER USER CONFIRMS PHASE 2)
+
+### ⚠️ CRITICAL: This phase is THIRD and ONLY executes after user confirms "y" to Phase 2 prompt
 
 ### Objective
 Apply MVC architecture transformations, create proper folder structure, fix anti-patterns, validate application.
+
+### Pre-Refactoring Checklist
+- [ ] User confirmed Phase 2 with "y" or "yes"
+- [ ] Audit report was saved to `reports/audit-project-N.md`
+- [ ] Phase 1 and Phase 2 completed successfully
 
 ### Use References
 - `references/mvc-guidelines.md` - MVC layer responsibilities
@@ -163,7 +253,7 @@ For each anti-pattern found in Phase 2:
 3. Apply transformation
 4. Test that code still works
 
-### Validation (MANDATORY)
+### Validation (MANDATORY — VERIFY ALL)
 
 After refactoring, verify:
 1. **Application boots** without errors
@@ -174,9 +264,11 @@ After refactoring, verify:
 
 ### Output Format
 
-Print Phase 3 completion summary using the structure shown in references, including:
+Print Phase 3 completion summary including:
 - New MVC structure created
 - Transformations applied (with ✓ checkmarks)
+- Validation results
+
 ### Legacy Files Cleanup
 
 After refactoring is validated, REQUIRED cleanup:
@@ -186,18 +278,28 @@ After refactoring is validated, REQUIRED cleanup:
 
 ---
 
-### MANDATORY: Save Audit Report
+### MANDATORY: Save Audit Report (AFTER Phase 3 Validation)
 
-After Phase 3 completes AND cleanup is verified, save the audit report:
+After Phase 3 completes AND cleanup is verified, audit report should be saved to:
 
-```bash
-cp <phase2-audit-output> reports/audit-project-1.md
-```
-
-**Report must be saved with exact filename:**
 - Project 1 (code-smells-project): `reports/audit-project-1.md`
 - Project 2 (ecommerce-api-legacy): `reports/audit-project-2.md`
 - Project 3 (task-manager-api): `reports/audit-project-3.md`
+
+**Filename MUST match project number exactly.**
+
+---
+
+## WORKFLOW SUMMARY
+
+**This is the ONLY correct order:**
+
+1. ✓ **PHASE 1 Executes First** → Analyze project → Print template
+2. ✓ **PHASE 2 Executes Second** → Audit findings → Print template → Ask for confirmation  
+3. ⏸️ **WAIT** → User must confirm "y" or "yes"
+4. ✓ **PHASE 3 Executes Third** → Refactor → Validate → Save report
+
+**NEVER skip or combine phases. NEVER proceed without confirmation.**
 
 ---
 
