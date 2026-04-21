@@ -11,7 +11,7 @@ The goal is to:
 
 ---
 
-# 🎯 Analysis Goals
+# Analysis Goals
 
 The agent MUST determine:
 
@@ -25,7 +25,7 @@ The agent MUST determine:
 
 ---
 
-# 🧠 Detection Strategy
+# Detection Strategy
 
 The agent MUST combine:
 
@@ -65,7 +65,7 @@ Never rely on a single signal.
 
 ---
 
-# ⚙️ 2. Framework Detection
+# 2. Framework Detection
 
 ## Python
 
@@ -101,7 +101,7 @@ If no framework is detected:
 
 ---
 
-# 🗄️ 3. Database Detection
+# 3. Database Detection
 
 ## Heuristics
 
@@ -138,7 +138,7 @@ If no framework is detected:
 
 ---
 
-# 🏗️ 4. Architecture Detection
+# 4. Architecture Detection
 
 ## Monolithic (Level 1 - NEEDS REFACTORING)
 
@@ -266,7 +266,7 @@ Maturity Score: [Low | Medium | High]
 
 ---
 
-# 🧱 3. Architecture Detection
+# 3. Architecture Detection
 
 ## Heuristics
 
@@ -348,7 +348,7 @@ The agent MUST classify code into:
 
 ---
 
-# 🗂️ 5. Dependency Analysis
+# 5. Dependency Analysis
 
 ## Python
 
@@ -368,7 +368,7 @@ The agent MUST classify code into:
 
 ---
 
-# 🗄️ 6. Database Detection
+# 6. Database Detection
 
 ## Heuristics
 
@@ -391,7 +391,7 @@ The agent MUST classify code into:
 
 ---
 
-# 🧠 7. Domain Inference
+# 7. Domain Inference
 
 ## Strategy
 
@@ -443,7 +443,7 @@ DB usage:
 
 ---
 
-# ⚠️ Important Rules
+# Important Rules
 
 * Always validate assumptions
 * Prefer evidence over guessing
@@ -452,7 +452,7 @@ DB usage:
 
 ---
 
-# 🚀 Advanced Heuristics (Optional)
+# Advanced Heuristics (Optional)
 
 * Detect layered violations (early signal for Phase 2)
 * Detect mixed responsibilities
@@ -469,7 +469,7 @@ Analysis must be:
 * Reproducible
 
 Bad:
-❌ "Looks like Flask project"
+WRONG: "Looks like Flask project"
 
 Good:
 ✔ "Detected Flask due to '@app.route' in app.py"
