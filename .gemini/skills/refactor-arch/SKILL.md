@@ -12,7 +12,52 @@ user-invocable: true
 disable-model-invocation: false
 ---
 
+**📝 UPDATE (2026-04-21):**
+This SKILL has been adjusted to **STRICTLY FOLLOW the README.md specification for Phase 1 output format**.
+- Phase 1 template now uses EXACT field order and format from README
+- Removed extra fields (LOC Estimate, Maturity, Key Entities) not present in README template
+- Phase 1 output now matches README example exactly
+
 # ⚡ IMPERATIVE INSTRUCTIONS FOR GEMINI (FOLLOW EXACTLY - ZERO TOLERANCE)
+
+**🚨 EMERGENCY RULES - READ BEFORE ANYTHING ELSE 🚨**
+
+**⚠️ CRITICAL CHECKPOINT: LOW SEVERITY FINDINGS**
+
+Before you output ANY Audit Report (Phase 2), you MUST verify:
+
+```
+Count of LOW severity findings ≥ 2?
+
+YES ✅ → Proceed to output Phase 2
+NO ❌ → STOP, search harder, find more LOW findings, then output Phase 2
+```
+
+**IF YOU OUTPUT PHASE 2 WITH ONLY 0-1 LOW FINDINGS → YOUR AUDIT IS INVALID.**
+
+---
+
+Your task is to print exactly what is shown in the templates below. NOTHING MORE.
+
+**YOU MUST PRINT EXACTLY THESE PHASES IN THIS ORDER - NO DEVIATIONS:**
+
+```
+[Print exactly these sections below - do NOT add anything else]
+
+PHASE 1 OUTPUT → STOP
+THEN PHASE 2 OUTPUT → STOP
+THEN WAIT for user confirmation → STOP
+THEN PHASE 3 (if confirmed) → STOP
+```
+
+**⚠️ CRITICAL: DO NOT BE CREATIVE**
+- ❌ Do NOT add "Executive Summary" 
+- ❌ Do NOT add "I have completed the analysis"
+- ❌ Do NOT add "Proposed Refactoring Strategy"
+- ❌ Do NOT describe Phase 3 before user confirms
+- ✓ Only print the templates shown below
+
+---
 
 **READ THIS FIRST BEFORE DOING ANYTHING:**
 
@@ -41,12 +86,14 @@ Your task has 3 mandatory phases. You MUST execute them in this exact order:
    - Validate application works
 
 **CRITICAL RULES (VIOLATION = TASK FAILURE):**
-- ❌ NO EMOJIS anywhere (0 tolerance: no 🔴, 📊, 🚀, or any icon)
+- ❌ **NO EMOJIS ANYWHERE** (0 tolerance: NO 🔴, 📊, 🚀, 🛡️, 📊, 🛑, 🟠, 🟡, 🟢, or ANY icon)
+- ❌ **NO ADDING EXTRA TEXT** (no "Executive Summary", no "I have completed", no descriptions)
 - ❌ NO PHASE 1 SKIPPING (must execute first, every time)
 - ❌ NO COMBINING PHASES (1 → STOP → 2 → STOP → 3 sequence)
 - ❌ NO ACCEPTING PHASE 3 WITHOUT USER CONFIRMATION
-- ❌ NO LOW FINDINGS < 2 (MUST find at least 2 LOW severity findings)
+- ❌ **NO LOW FINDINGS < 2** (MUST find at least 2 LOW severity findings - if you have 1, keep searching)
 - ❌ NO ASCII ART TABLES (no ┌──┐, ├──┤, └──┘ characters)
+- ❌ **NO DESCRIBING PHASE 3 BEFORE USER CONFIRMS** (Phase 2 ends with question, nothing more)
 - ✓ EXACT TEMPLATES ONLY (use provided format, substitute only values)
 - ✓ WAIT for user confirmation before proceeding between phases
 
@@ -62,26 +109,24 @@ Your task has 3 mandatory phases. You MUST execute them in this exact order:
 ================================
 PHASE 1: PROJECT ANALYSIS
 ================================
-
-Language:       Python
+Language:      Python
 Framework:      Flask 3.1.1
-Dependencies:   flask, flask-cors
-Architecture:   Partially Structured Monolith
-Domain:         E-commerce API (Produtos, Usuários, Pedidos)
-Database:       SQLite (loja.db)
-Source Files:   4
-LOC Estimate:   ~700
-Maturity:       Level 1 (Monolith)
-
-Key Entities:
-  - Models: Produto, Usuario, Pedido, Item_Pedido
-  - Routes: GET /produtos, POST /usuarios, POST /pedidos
-  - Tables: produtos, usuarios, pedidos, itens_pedido
-
+Dependencies:  flask-cors
+Domain:        E-commerce API (produtos, pedidos, usuários)
+Architecture:  Monolítica — tudo em 4 arquivos, sem separação de camadas
+Source files:  4 files analyzed
+DB tables:     produtos, usuarios, pedidos, itens_pedido
 ================================
 ```
 
-**This is what Phase 1 output MUST look like. No descriptions, no paragraphs, no bullets before each item.**
+**RULES FOR PHASE 1 OUTPUT (DO NOT DEVIATE):**
+- Use EXACTLY this format
+- NO blank lines between header and first field
+- NO extra fields (no LOC Estimate, no Maturity, no Key Entities)
+- Fields in EXACT order: Language, Framework, Dependencies, Domain, Architecture, Source files, DB tables
+- NO spacing alignment variations (maintain exact spacing shown)
+- NO emojis, NO markdown, NO descriptions
+- End with `================================` separator
 
 ---
 
@@ -254,7 +299,31 @@ File: app.py, Line: 59
 
 ❌ WRONG: Only finding CRITICAL and HIGH (0-1 LOW findings)
 ✓ CORRECT: Finding at least 2 LOW findings (magic strings, magic numbers, bad naming, etc.)
-- ✓ Each finding must follow exact structure (no bullet points, no summaries)
+
+---
+
+## 🚨 ULTRA-STRICT RULES (NO FLEXIBILITY)
+
+**EMOJI RULE = ZERO**
+- Any emoji present = FAIL
+- No 🔴, 📊, 🛡️, 🛑, 🟠, 🟡, 🟢, 🚀, ✓, •, etc.
+
+**TEMPLATE RULE = EXACT**
+- Phase 1: Use template shown above ONLY
+- Phase 2: Use template shown above ONLY
+- No "I completed the analysis"
+- No "Executive Summary"
+- No "Proposed Refactoring"
+
+**LOW FINDINGS RULE = 2 MINIMUM**
+- Before Phase 2 output: Count LOW findings
+- If < 2: KEEP SEARCHING, THEN OUTPUT
+- If ≥ 2: OK to output Phase 2
+
+**PHASE 3 RULE = AFTER CONFIRMATION**
+- Phase 2 ends with: `Proceed with refactoring (Phase 3)? [y/n]`
+- Then: STOP and WAIT for user response
+- Never describe Phase 3 before user confirms
 
 ---
 
@@ -290,52 +359,59 @@ Detect programming language, framework, architecture type, domain, database, and
 ### Use Reference
 Load `references/analysis.md` for detection heuristics.
 
-### Minimum Detections (DETECT ALL)
-1. **Language:** Python, Node.js, etc.
-2. **Framework:** Flask, Django, Express, etc.
-3. **Dependencies:** List top 3-5
-4. **Architecture:** Monolith | Partially Structured | Layered
-5. **Domain:** What does the app do?
-6. **Database:** SQLite, PostgreSQL, MongoDB, etc.
-7. **Files Count:** Number of source files
-8. **LOC Estimate:** Approximate lines of code
-9. **Project Maturity:** Level 1 (Monolith) | Level 2 (Partial) | Level 3 (Layered)
-10. **Key Entities:** Models/Tables identified
+### Minimum Detections (DETECT ALL REQUIRED FIELDS)
+
+For any project, you MUST detect and report:
+
+1. **Language** (Python, Node.js, Java, etc.)
+2. **Framework** (Flask, Django, Express, Spring, etc.) with version
+3. **Dependencies** (top 3-5 packages/libraries)
+4. **Domain** (what does this application do? - E-commerce API, Task Manager, LMS, etc.)
+5. **Architecture** (current state: Monolítica/Monolith, Partially Structured, Layered, etc.)
+6. **Source files** (number of analyzed source files - literal format: "N files analyzed")
+7. **DB tables** (list all database tables found)
+
+**DO NOT detect extra fields.** Only these 7 fields appear in the output.
+The example shows the EXACT format expectations.
 
 ### Output Format (USE EXACTLY THIS TEMPLATE — NO CHANGES, NO EMOJIS)
 
-**COPY-PASTE this exact format. Only replace the VALUES (right side of colons):**
+**COPY-PASTE this exact format. Only replace the VALUES (right side of colons).**
+
+Follow this template EXACTLY as shown. No deviations, no extra fields, no reordering:
 
 ```
 ================================
 PHASE 1: PROJECT ANALYSIS
 ================================
-
-Language:       Python
-Framework:      Flask 3.1.1
-Dependencies:   flask, flask-cors
-Architecture:   Partially Structured Monolith
-Domain:         E-commerce API (Produtos, Usuários, Pedidos)
-Database:       SQLite (loja.db)
-Source Files:   4
-LOC Estimate:   ~700
-Maturity:       Level 1 (Monolith)
-
-Key Entities:
-  - Models: Produto, Usuario, Pedido, Item_Pedido
-  - Routes: GET /produtos, POST /usuarios, POST /pedidos
-  - Tables: produtos, usuarios, pedidos, itens_pedido
-
+Language:      [LANGUAGE]
+Framework:      [FRAMEWORK & VERSION]
+Dependencies:  [TOP 3-5 DEPENDENCIES]
+Domain:        [APPLICATION DOMAIN]
+Architecture:  [ARCHITECTURE TYPE]
+Source files:  [NUMBER] files analyzed
+DB tables:     [TABLE LIST]
 ================================
 ```
 
-**IMPORTANT:** 
-- Print EXACTLY this format
-- Do NOT add emojis, descriptions, or explanations
-- Do NOT add comments or markdown formatting
-- Do NOT use paragraphs or bullet points (like "- Language: Python" or "Language: Python")
-- Just the facts in plain text structure
-- Do NOT proceed to Phase 2 until this is fully printed
+**EXAMPLES OF CORRECT FIELD VALUES:**
+
+- `Language:      Python` or `Language:      JavaScript`
+- `Framework:      Flask 3.1.1` or `Framework:      Express 4.18.2`
+- `Dependencies:  flask-cors, werkzeug` (comma-separated, no bullets)
+- `Domain:        E-commerce API (produtos, pedidos, usuários)` (describe what app does)
+- `Architecture:  Monolítica — tudo em 4 arquivos, sem separação de camadas` (current state)
+- `Source files:  4 files analyzed` (literal format)
+- `DB tables:     produtos, usuarios, pedidos, itens_pedido` (comma-separated)
+
+**CRITICAL CHECKLIST BEFORE OUTPUTTING PHASE 1:**
+- ❌ NO blank lines after `================================` header
+- ❌ NO extra fields like "LOC Estimate", "Maturity", "Key Entities"
+- ❌ NO reordering fields (keep exact order shown above)
+- ❌ NO emojis or special characters
+- ✓ Exact field names and spacing from template
+- ✓ Only substitute the bracketed [VALUES]
+- ✓ End with final `================================` separator
 
 ---
 
@@ -344,6 +420,35 @@ Key Entities:
 ### ⚠️ CRITICAL: This phase is SECOND and ONLY executes after Phase 1 is fully printed.
 
 ### ⚠️ CRITICAL REMINDER: After Phase 2, YOU MUST STOP and wait for user confirmation. Do NOT continue to Phase 3.
+
+### ⚠️ CRITICAL REMINDER ON LOW FINDINGS (READ THIS FIRST):
+
+**YOUR PHASE 2 IS INVALID IF YOU HAVE FEWER THAN 2 LOW FINDINGS.**
+
+**DO NOT OUTPUT PHASE 2 UNLESS YOU HAVE AT LEAST 2 LOW SEVERITY FINDINGS.**
+
+**📋 USE THIS CHECKLIST:** Read `CHECK_LOW_FINDINGS.md` for mandatory LOW findings by project.
+
+---
+
+Count your LOW findings BEFORE you print Phase 2:
+
+- Finding 0-1 LOW? → **STOP** and search harder → Find more → Then output
+- Finding 2+ LOW? → OK, proceed with Phase 2 output
+
+**Examples of LOW findings (from code-smells-project README):**
+
+1. **[LOW] Magic Strings for Status** — controllers.py + models.py
+   - Problem: Status values `"pendente"`, `"aprovado"`, `"cancelado"` hardcoded as strings
+   - Search pattern: Look for where status is set/compared in code
+
+2. **[LOW] Inconsistent Nomenclature** — database.py + multiple files
+   - Problem: Mix of Portuguese/English naming: `get_db()`, `listar_produtos()`, `criar_pedido()`, `atualizar_status_pedido()`
+   - Search pattern: Look for inconsistent function naming across codebase
+
+**If you're analyzing code-smells-project and don't find these 2 LOW findings, search harder. They definitely exist.**
+
+---
 
 BEFORE YOU DO ANYTHING:
 1. Check if Phase 1 is already printed
@@ -369,48 +474,53 @@ Detect anti-patterns, classify by severity, generate structured audit report usi
 
 ### MANDATORY REQUIREMENTS FOR PHASE 2
 
+**⚠️ BEFORE YOU START PHASE 2, READ THIS:**
+
+You MUST find **exactly 2 LOW severity findings**. If you have only 1 LOW finding, you have FAILED the audit.
+
+**THIS IS NOT OPTIONAL. IF YOU HAVE 1 LOW FINDING → KEEP SEARCHING → FIND 1 MORE → THEN STOP**
+
+The audit is incomplete if you don't have 2 LOW findings.
+
+---
+
 **EXACTLY 5+ findings required — THIS IS NOT OPTIONAL:**
 - ✓ 1-2 CRITICAL findings
 - ✓ 1-2 HIGH findings  
 - ✓ 2 MEDIUM findings
-- ✓ **2 LOW findings (NOT 1, NOT 0 — MUST BE EXACTLY 2 OR MORE)**
+- ✓ **2 LOW findings (NOT 1, NOT 0, NOT 3+, EXACTLY 2 OR MORE)**
 
 **⚠️ CRITICAL REMINDER ON LOW FINDINGS:**
 
-You MUST find 2 LOW severity findings. This is not a suggestion, it's a requirement.
+Count your LOW findings before you output Phase 2.
 
-If you have found < 2 LOW findings, STOP and keep searching until you find exactly 2.
+- If you have 0 LOW → Search harder → Find 2 → Then output
+- If you have 1 LOW → Continue searching → Find 1 more → Then output
+- If you have 2+ LOW → OK, you can output
 
-**Common LOW severity findings to search for (Examples from code-smells-project):**
+**Examples of LOW findings to search for (real examples from code-smells-project):**
 
-1. **Magic Strings for Status** (code-smells-project example)
-   - File: models.py, controllers.py
-   - Pattern: `status = "pendente"` or `"aprovado"` hardcoded multiple times
+1. **Magic Strings for Status** (Example: models.py line where status is used)
+   - Pattern: Status values like "pendente", "aprovado", "cancelado" hardcoded as strings
    - Problem: No constants, typo risk, no validation
-   
-2. **Magic Numbers for Business Rules** (code-smells-project example)
-   - File: models.py, Lines: 146-153
-   - Pattern: `if faturamento > 10000:` and `desconto = faturamento * 0.1`
-   - Problem: Discount rates (10%, 5%, 2%) hardcoded without named constants
-   
-3. **Inconsistent Naming Convention** (code-smells-project example)
-   - File: database.py, controllers.py
-   - Pattern: Mix of Portuguese/English: `get_db()`, `listar_produtos()`, `criar_pedido()`
-   - Problem: Confusing naming, no consistency
 
-4. **Poor Exception Handling** (Generic pattern)
-   - File: controllers.py
-   - Pattern: `except Exception as e:` catching all exceptions
+2. **Magic Numbers for Business Rules** (Example: models.py lines 146-153)
+   - Pattern: `if faturamento > 10000:` or `desconto = 0.1` hardcoded
+   - Problem: Discount rates (10%, 5%, 2%) hardcoded without named constants
+
+3. **Inconsistent Nomenclature** (Example: mix across files)
+   - Pattern: `get_db()` (English), `listar_produtos()` (Portuguese), `criar_pedido()` (mix)
+   - Problem: Inconsistent naming makes code confusing
+
+4. **Duplicated Code** (Example: same `dict(row)` in multiple files)
+   - Pattern: Row-to-dictionary conversion logic repeated
+   - Problem: Maintenance burden, high chance of inconsistency
+
+5. **Poor Exception Handling** (Example: controllers.py)
+   - Pattern: `except Exception as e:` catching all exceptions generically
    - Problem: No specific error types, loses debugging information
 
-5. **Code Duplication** (code-smells-project example)
-   - File: controllers.py, models.py
-   - Pattern: `dict(row)` serialization logic repeated in multiple places
-   - Problem: Maintenance burden, inconsistent formats
-
-**If you can't find LOW findings using these examples, you must search harder. Do not proceed with Phase 2 output if you have < 2 LOW findings.**
-
-**Detection Strategy (COMPREHENSIVE SEARCH):**
+**Do not output Phase 2 until you have at least 2 LOW findings.**
 
 1. **CRITICAL Anti-Patterns** — Search for:
    - Hardcoded credentials: `SECRET_KEY =`, `password =`, `API_KEY =` (check for string literals)
@@ -435,12 +545,24 @@ If you have found < 2 LOW findings, STOP and keep searching until you find exact
    - Magic numbers in models.py line 146: `if faturamento > 10000:` and `desconto = faturamento * 0.1`
    - Code duplication: `dict(row)` conversion in both controllers.py and models.py
    
-4. **LOW Anti-Patterns (MUST FIND AT LEAST 2)** — Search for:
-   - Magic strings: Hardcoded status values like `"pendente"`, `"aprovado"` repeated in code
-   - Poor naming: Inconsistent function naming (mix of Portuguese/English, abbreviations)
-   - Inconsistent conventions: Different naming styles across modules
+4. **LOW Anti-Patterns (MUST FIND AT LEAST 2 — REQUIRED, NOT OPTIONAL)** — Search for:
+   
+   **FOR code-smells-project SPECIFICALLY (if analyzing this project):**
+   - **[LOW] Magic Strings for Status:** Search models.py and controllers.py for hardcoded status values like `"pendente"`, `"aprovado"`, `"cancelado"` used repeatedly without constants
+   - **[LOW] Inconsistent Nomenclature:** Search database.py and other files for mixed naming conventions (Portuguese/English mix like `get_db()`, `listar_produtos()`, `criar_pedido()`, `atualizar_status_pedido()`)
+   
+   **GENERAL LOW patterns (for any project):**
+   - Magic numbers: Hardcoded numeric values without named constants
+   - Poor naming: Abbreviated or cryptic variable names that reduce readability
    - Generic exception handling: `except Exception as e:` without specific error types
    - Unused imports or poorly organized code structure
+   - Duplicate utility functions or serialization logic
+   
+   **⚠️ CRITICAL REMINDER:**
+   - Count your LOW findings BEFORE outputting Phase 2
+   - If you have < 2 LOW → KEEP SEARCHING → Find more → THEN output Phase 2
+   - Do NOT output Phase 2 with less than 2 LOW findings
+   - This is NOT optional. Low severity findings are REQUIRED.
 
 ### Report Format — USE EXACT TEMPLATE (ABSOLUTELY NO DEVIATIONS)
 
@@ -627,7 +749,34 @@ After Phase 3 completes AND cleanup is verified, audit report should be saved to
 3. ⏸️ **WAIT** → User must confirm "y" or "yes"
 4. ✓ **PHASE 3 Executes Third** → Refactor → Validate → Save report
 
-**NEVER skip or combine phases. NEVER proceed without confirmation.**
+**NEVER skip or combine phases. NEVER proceed without confirmation.** 
+
+**DO NOT ADD ANYTHING TO THE TEMPLATES.**
+
+---
+
+## 🚨 EMERGENCY MESSAGE IF YOU'RE STUCK
+
+If you're not sure what to do, follow this exact sequence:
+
+```
+Step 1: Print Phase 1 (use the EXACT template shown above)
+  → Check: No emojis? No extra text? ✓
+  → Done? Go to Step 2
+
+Step 2: Audit code and find 2+ LOW findings
+  → Check: Do I have 2 LOW? If NO, keep searching
+  → Found 2? Go to Step 3
+
+Step 3: Print Phase 2 (use the EXACT template shown above)  
+  → Check: No emojis? No ASCII art? Markdown table? 2 LOW findings present?
+  → Check: Ends with confirmation question? ✓
+  → Done? STOP and WAIT
+
+Step 4: Wait for "y" or "yes"
+  → Got confirmation? Go to Phase 3
+  → No confirmation? STOP
+```
 
 ---
 
