@@ -77,12 +77,38 @@ Key Entities:
 Detect anti-patterns, classify by severity, generate structured audit report.
 
 ### Use References
-- `references/anti-patterns.md` - Anti-pattern catalog with detection signals
+- `references/anti-patterns.md` - Anti-pattern catalog with detection signals and examples
 - `references/report-template.md` - Report format template
 
 ### MANDATORY REQUIREMENTS FOR PHASE 2
 
 **Minimum Findings:** 5 (≥1 CRITICAL/HIGH, ≥2 MEDIUM, ≥2 LOW)
+
+**Detection Strategy (COMPREHENSIVE SEARCH):**
+
+1. **CRITICAL Anti-Patterns** — Search for:
+   - Hardcoded credentials: `SECRET_KEY =`, `password =`, `API_KEY =` (check for string literals)
+   - SQL Injection: String concatenation in queries (`"SELECT * FROM WHERE id = " +`)
+   - Arbitrary code execution: `/admin/*` endpoints without auth
+   - Weak crypto: `hashlib.md5()`, `hashlib.sha1()`, `base64` for passwords
+   - No DB validation: Direct SQL execution endpoints
+
+2. **HIGH Anti-Patterns** — Search for:
+   - Business logic in models: Calculation loops, inventory management, discount logic in model functions
+   - Tight coupling: Controllers calling models directly without service layer
+   - No dependency injection: Direct instantiation of objects
+   - Global mutable state: Shared variables across modules
+
+3. **MEDIUM Anti-Patterns** — Search for:
+   - N+1 queries: `for row in rows:` followed by DB queries inside loop
+   - Code duplication: Same `dict(row)`, serialization, or logic repeated in multiple files
+   - Missing input validation: No schema/validator middleware on routes
+   - Magic numbers: Hardcoded values like `10`, `5`, `1000` without constants
+
+4. **LOW Anti-Patterns** — Search for:
+   - Magic strings: Hardcoded status values like `"pendente"`, `"aprovado"` repeated in code
+   - Poor naming: Inconsistent function naming (mix of Portuguese/English, abbreviations)
+   - Inconsistent conventions: Different naming styles across modules
 
 **Report Format:** Follow `references/report-template.md` for exact structure:
 - File + line numbers for each finding
@@ -90,6 +116,7 @@ Detect anti-patterns, classify by severity, generate structured audit report.
 - Impact + Recommendation for each
 - Summary table with severity distribution
 - Sorted by severity (CRITICAL → LOW)
+- Must include at least: 1-2 CRITICAL, 1 HIGH, 2 MEDIUM, 2 LOW
 
 ### POST-AUDIT MANDATORY STOP
 
