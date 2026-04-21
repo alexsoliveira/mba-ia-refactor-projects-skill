@@ -12,24 +12,43 @@ user-invocable: true
 disable-model-invocation: false
 ---
 
-# ⚡ IMPERATIVE INSTRUCTIONS FOR GEMINI (FOLLOW EXACTLY)
+# ⚡ IMPERATIVE INSTRUCTIONS FOR GEMINI (FOLLOW EXACTLY - ZERO TOLERANCE)
 
-**DO NOT DEVIATE FROM THIS WORKFLOW:**
+**READ THIS FIRST BEFORE DOING ANYTHING:**
 
-1. **PHASE 1 NOW** → Analyze project → Output EXACT template format → NO emojis, descriptions, or extras
-2. **THEN PHASE 2** → Audit code → Find ≥5 findings → Output EXACT template format → NO emojis, descriptions, or extras
-3. **THEN WAIT** → Print confirmation prompt: `Proceed with refactoring (Phase 3)? [y/n]` → STOP and wait for user input
-4. **IF USER SAYS YES** → THEN PHASE 3 → Refactor → Validate → Save report to `reports/audit-project-N.md`
-5. **IF USER SAYS NO** → STOP. Do NOT refactor.
+Your task has 3 mandatory phases. You MUST execute them in this exact order:
 
-**CRITICAL RULES (ZERO TOLERANCE):**
-- ❌ NO emojis, symbols, or icons anywhere
-- ❌ NO combining phases (1+2+3 together)
-- ❌ NO skipping to Phase 3 without user confirmation
-- ❌ NO deviations from template format
-- ✓ Use EXACT template structure for Phase 1 and Phase 2 outputs
-- ✓ Each finding MUST have: [SEVERITY], File:Line, Code example, Impact
-- ✓ Each phase MUST complete before next phase begins
+1. **PHASE 1 MUST EXECUTE FIRST** (no exceptions)
+   - Analyze the project
+   - Print EXACT template (copy-paste the format below, substitute values only)
+   - Do NOT add emojis, titles, or descriptions
+   - Do NOT proceed to Phase 2 until Phase 1 is fully printed
+
+2. **PHASE 2 EXECUTES SECOND** (after Phase 1 completes)
+   - Audit code for anti-patterns
+   - Print EXACT template (copy-paste the format below, substitute values only)
+   - Do NOT use emojis, symbols, bullets, or any formatting except markdown
+   - MANDATORY: Find at least 5 findings with this distribution:
+     * 1-2 CRITICAL
+     * 1-2 HIGH
+     * 2 MEDIUM
+     * 2 LOW (THIS IS NOT OPTIONAL - you MUST find 2 LOW findings)
+   - Print confirmation prompt and STOP (wait for user input)
+
+3. **PHASE 3 EXECUTES THIRD** (ONLY if user confirms with "y" or "yes")
+   - Refactor the code
+   - Save audit report to `reports/audit-project-N.md`
+   - Validate application works
+
+**CRITICAL RULES (VIOLATION = TASK FAILURE):**
+- ❌ NO EMOJIS anywhere (0 tolerance: no 🔴, 📊, 🚀, or any icon)
+- ❌ NO PHASE 1 SKIPPING (must execute first, every time)
+- ❌ NO COMBINING PHASES (1 → STOP → 2 → STOP → 3 sequence)
+- ❌ NO ACCEPTING PHASE 3 WITHOUT USER CONFIRMATION
+- ❌ NO LOW FINDINGS < 2 (MUST find at least 2 LOW severity findings)
+- ✓ EXACT TEMPLATES ONLY (use provided format, substitute only values)
+- ✓ WAIT for user confirmation before proceeding between phases
+- ✓ Each finding must follow exact structure (no bullet points, no summaries)
 
 ---
 
@@ -50,9 +69,14 @@ This skill performs a **3-phase automated refactoring workflow** to transform an
 
 ---
 
-## PHASE 1 — PROJECT ANALYSIS (DO THIS FIRST)
+## PHASE 1 — PROJECT ANALYSIS (⚠️ MUST EXECUTE FIRST, ALWAYS)
 
-### ⚠️ CRITICAL: This phase MUST execute FIRST, before anything else
+### ⚠️ CRITICAL: This phase MUST execute FIRST. NEVER skip it. NEVER combine with Phase 2.
+
+BEFORE YOU DO ANYTHING:
+1. Check if Phase 1 has been printed yet
+2. If NO → Print Phase 1 immediately (this is the first thing user should see)
+3. If YES → Proceed to Phase 2
 
 ### Objective
 Detect programming language, framework, architecture type, domain, database, and project maturity.
@@ -73,6 +97,8 @@ Load `references/analysis.md` for detection heuristics.
 10. **Key Entities:** Models/Tables identified
 
 ### Output Format (USE EXACTLY THIS TEMPLATE — NO CHANGES, NO EMOJIS)
+
+**COPY-PASTE this exact format. Only replace the VALUES (right side of colons):**
 
 ```
 ================================
@@ -97,13 +123,23 @@ Key Entities:
 ================================
 ```
 
-**IMPORTANT:** Print EXACTLY this format. Do NOT add emojis, descriptions, or explanations. Just the facts in this structure.
+**CRITICAL:** 
+- Print EXACTLY this format
+- Do NOT add emojis, descriptions, or explanations
+- Do NOT add comments or markdown formatting
+- Just the facts in plain text structure
+- Do NOT proceed to Phase 2 until this is fully printed
 
 ---
 
-## PHASE 2 — ARCHITECTURE AUDIT (AFTER PHASE 1 COMPLETES)
+## PHASE 2 — ARCHITECTURE AUDIT (⚠️ AFTER PHASE 1 COMPLETES - NEVER COMBINE)
 
-### ⚠️ CRITICAL: This phase is SECOND. Do NOT combine with Phase 1.
+### ⚠️ CRITICAL: This phase is SECOND and ONLY executes after Phase 1 is fully printed.
+
+BEFORE YOU DO ANYTHING:
+1. Check if Phase 1 is already printed
+2. If NO → Print Phase 1 first (never start with Phase 2!)
+3. If YES → Proceed with Phase 2 audit
 
 ### Objective
 Detect anti-patterns, classify by severity, generate structured audit report using EXACT template format.
@@ -114,7 +150,22 @@ Detect anti-patterns, classify by severity, generate structured audit report usi
 
 ### MANDATORY REQUIREMENTS FOR PHASE 2
 
-**Minimum Findings:** 5 (≥1 CRITICAL/HIGH, ≥2 MEDIUM, ≥2 LOW)
+### MANDATORY REQUIREMENTS FOR PHASE 2
+
+**EXACTLY 5+ findings required — THIS IS NOT OPTIONAL:**
+- ✓ 1-2 CRITICAL findings
+- ✓ 1-2 HIGH findings  
+- ✓ 2 MEDIUM findings
+- ✓ **2 LOW findings (NOT 1, NOT 0 — MUST BE 2)**
+
+If you find < 2 LOW findings, KEEP SEARCHING until you find 2 LOW severity findings.
+
+**Examples of LOW severity findings to search for:**
+- Magic strings (hardcoded status strings like "pendente", "aprovado" without constants)
+- Magic numbers (hardcoded values like `1000`, `10`, `5` without named constants)
+- Poor naming conventions (abbreviations, inconsistent naming between Portuguese/English)
+- Unnecessary catch-all exception handlers (`except Exception as e`)
+- Unused or poorly organized imports
 
 **Detection Strategy (COMPREHENSIVE SEARCH):**
 
@@ -137,12 +188,14 @@ Detect anti-patterns, classify by severity, generate structured audit report usi
    - Missing input validation: No schema/validator middleware on routes
    - Magic numbers: Hardcoded values like `10`, `5`, `1000` without constants
 
-4. **LOW Anti-Patterns** — Search for:
+4. **LOW Anti-Patterns (MUST FIND 2)** — Search for:
    - Magic strings: Hardcoded status values like `"pendente"`, `"aprovado"` repeated in code
    - Poor naming: Inconsistent function naming (mix of Portuguese/English, abbreviations)
    - Inconsistent conventions: Different naming styles across modules
+   - Generic exception handling: `except Exception as e:` without specific error types
+   - Unused imports or poorly organized code structure
 
-### Report Format — USE EXACT TEMPLATE (NO EMOJIS, NO DEVIATIONS)
+### Report Format — USE EXACT TEMPLATE (ABSOLUTELY NO DEVIATIONS)
 
 Follow `references/report-template.md` EXACTLY. Your report MUST have:
 
@@ -171,7 +224,7 @@ Follow `references/report-template.md` EXACTLY. Your report MUST have:
    - **Impact:** Single sentence describing business/security impact
    - **Separator:** `---` (between findings)
 
-4. **Example format for ONE finding:**
+4. **Example format for ONE finding (COPY THIS STRUCTURE EXACTLY):**
    ```
    ### [CRITICAL] Hardcoded Credentials
 
@@ -199,20 +252,36 @@ Follow `references/report-template.md` EXACTLY. Your report MUST have:
    Proceed with refactoring (Phase 3)? [y/n]
    ```
 
-### IMPORTANT VALIDATIONS
+### WHAT NOT TO DO (ZERO TOLERANCE VIOLATIONS)
 
-- ✓ NO EMOJIS anywhere (remove 🚨, ✓, *, etc.)
+❌ **DO NOT DO THESE THINGS - THEY WILL BREAK THE SKILL:**
+
+1. ❌ Use ANY emojis (🚀, 📊, 🔴, 🟠, 🟡, ✓, *, •, etc.)
+2. ❌ Use bullet points (•, *, -, etc.) for findings
+3. ❌ Use colored text or markdown formatting for severity (example: ~~never~~ do this)
+4. ❌ Combine findings into one summary line
+5. ❌ Use "Phase 3 Refactoring Plan" or "Proposed Solutions" in Phase 2
+6. ❌ Skip findings (MUST have minimum 5)
+7. ❌ Have fewer than 2 LOW severity findings
+8. ❌ Put descriptions in bullet format instead of structured [SEVERITY] format
+9. ❌ Skip the confirmation prompt at the end
+10. ❌ Suggest refactoring actions in Phase 2 (Phase 2 is AUDIT ONLY, Phase 3 is REFACTORING)
+
+### IMPORTANT VALIDATIONS (CHECK BEFORE PRINTING)
+
+- ✓ NO EMOJIS anywhere (check entire output)
 - ✓ Findings MUST be sorted: CRITICAL first, then HIGH, then MEDIUM, then LOW
-- ✓ EACH finding MUST have: [SEVERITY], File:Line, Code example, Impact
+- ✓ EACH finding MUST have: [SEVERITY], File:Line, Code example, Impact, then ---
 - ✓ MUST have Summary Table (not bullet points)
 - ✓ MUST include footer with confirmation prompt
-- ✓ MUST have at least 5 findings (≥1 CRITICAL/HIGH, ≥2 MEDIUM, ≥2 LOW)
+- ✓ MUST have at least 5 findings
+- ✓ MUST have at least 2 LOW findings (NOT 1, NOT 0)
 
-### POST-AUDIT: WAIT FOR CONFIRMATION
+### POST-AUDIT: MANDATORY STOP
 
 Print the confirmation prompt and STOP. Do NOT proceed to Phase 3 until user confirms with "y" or "yes".
 
-If user confirms:
+If user confirms "y" or "yes":
 - Acknowledge confirmation
 - Proceed to PHASE 3
 - Save the audit report you just printed to `reports/audit-project-N.md`
