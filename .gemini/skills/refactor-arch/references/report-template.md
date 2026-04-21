@@ -229,17 +229,17 @@ status = cc.startsWith("4") ? "PAID" : "DENIED"
 
 ## Format Rules (STRICT)
 
-✅ **MUST HAVE:**
+MUST HAVE:
 - File + line numbers (exact locations)
 - Code snippet (3-5 lines showing problem)
 - Impact bullet points (2-3 consequences)
 - Actionable recommendation
 
-✅ **ORDERING:**
+ORDERING:
 - Sort by severity: CRITICAL → HIGH → MEDIUM → LOW
 - Most impactful findings first
 
-✅ **TONE:**
+TONE:
 - Professional, factual, non-judgmental
 - Technical impact focused
 - Always provide solution
