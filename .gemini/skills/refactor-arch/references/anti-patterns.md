@@ -443,7 +443,124 @@ MEDIUM / HIGH (depends)
 
 ---
 
-# 📌 Detection Strategy (IMPORTANT)
+# � Python/Flask SPECIFIC DETECTION PATTERNS
+
+This section provides concrete code patterns to detect anti-patterns in Python/Flask projects.
+
+## Magic Numbers/Strings (LOW)
+
+### Pattern Detection
+
+Search for hardcoded numeric or status values without constants:
+
+```python
+# ❌ BAD - Magic number without context
+if faturamento > 10000:
+    desconto = faturamento * 0.1
+
+# ❌ BAD - Magic string status (repeated multiple times)
+status = "pendente"
+cursor.execute("SELECT COUNT(*) FROM pedidos WHERE status = 'pendente'")
+if novo_status == "aprovado":
+    ...
+```
+
+### Search Strategy
+
+- Look for `if <var> > <number>` or `if <var> < <number>`
+- Look for magic strings: `"pendente"`, `"aprovado"`, `"cancelado"`, etc. appearing 3+ times
+- Check for hardcoded thresholds (e.g., 10000, 5000, 1000) without explanation
+
+---
+
+## Code Duplication / DRY Violation (MEDIUM)
+
+### Pattern Detection
+
+Search for repeated logic across files:
+
+```python
+# ❌ In models.py
+for row in rows:
+    result.append({
+        "id": row["id"],
+        "nome": row["nome"],
+        "email": row["email"],
+    })
+
+# ❌ In controllers.py (same logic repeated)
+for row in rows:
+    result.append({
+        "id": row["id"],
+        "nome": row["nome"],
+        "email": row["email"],
+    })
+```
+
+### Search Strategy
+
+- Look for identical `dict(row)` conversion patterns
+- Search for repeated `result.append({...})` blocks
+- Check for identical validation logic in multiple functions
+- Look for similar serialization code in different files
+
+---
+
+## Poor Naming / Inconsistency (LOW-MEDIUM)
+
+### Pattern Detection
+
+Search for naming inconsistencies:
+
+```python
+# ❌ Bad - Mix Portuguese/English
+def listar_produtos():  # Portuguese
+    pass
+
+def get_usuario_por_id(id):  # Mixed Portuguese/English
+    pass
+
+def buscar_pedidos(usuario_id):  # Portuguese
+    pass
+```
+
+### Search Strategy
+
+- Check if function names mix Portuguese + English
+- Look for abbreviations: `cid`, `cc`, `enrId` without clear meaning
+- Check for inconsistent naming patterns across a module
+
+---
+
+## N+1 Query Problem (MEDIUM)
+
+### Pattern Detection
+
+Search for database queries inside loops:
+
+```python
+# ❌ BAD - N+1 Query
+cursor.execute("SELECT * FROM pedidos WHERE usuario_id = ?")  # Query 1
+rows = cursor.fetchall()
+for row in rows:  # Loop
+    cursor2 = db.cursor()
+    cursor2.execute("SELECT * FROM itens_pedido WHERE pedido_id = ?")  # Query N
+    itens = cursor2.fetchall()
+    for item in itens:
+        cursor3 = db.cursor()
+        cursor3.execute("SELECT nome FROM produtos WHERE id = ?")  # Query N+M
+```
+
+### Search Strategy
+
+- Look for `cursor.execute()` inside `for` or `while` loops
+- Check for nested loops with DB queries
+- Look for patterns like: outer query + inner query in loop
+- Verify if JOINs could replace the loop logic
+
+---
+
+# �📌 Detection Strategy (IMPORTANT)
 
 The agent MUST:
 
