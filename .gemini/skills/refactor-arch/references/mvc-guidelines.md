@@ -6,7 +6,7 @@ The agent MUST transform any codebase into this structure.
 
 ---
 
-# 🎯 Objective
+## Objective
 
 Ensure the application follows:
 
@@ -17,23 +17,23 @@ Ensure the application follows:
 
 ---
 
-# 🧠 Core Principle
+## Core Principle
 
 MVC is based on **Separation of Concerns**, where:
 
-* Model → data and business rules
-* View → presentation / routing
-* Controller → orchestration
+* Model: data and business rules
+* View: presentation / routing
+* Controller: orchestration
 
-Each layer MUST have a **single responsibility** ([TechTarget][1])
-
----
-
-# 🧱 MVC Layers Definition
+Each layer MUST have a **single responsibility**.
 
 ---
 
-## 📦 1. Model Layer
+## MVC Layers Definition
+
+---
+
+## 1. Model Layer
 
 ### Responsibility
 
@@ -55,7 +55,7 @@ Each layer MUST have a **single responsibility** ([TechTarget][1])
 
 ---
 
-## 🌐 2. View / Routes Layer
+## 2. View / Routes Layer
 
 ### Responsibility
 
@@ -77,7 +77,7 @@ Each layer MUST have a **single responsibility** ([TechTarget][1])
 
 ---
 
-## 🧠 3. Controller Layer
+## 3. Controller Layer
 
 ### Responsibility
 
@@ -112,7 +112,7 @@ The Controller acts as the **central coordinator** ([Codecademy][2])
 
 ---
 
-# 🗂️ Target Folder Structure
+# Target Folder Structure
 
 ```bash
 src/
@@ -131,7 +131,7 @@ src/
 
 ---
 
-# ⚙️ Configuration Rules
+# Configuration Rules
 
 * All configuration MUST be externalized
 * No hardcoded values allowed
@@ -178,7 +178,7 @@ src/
 
 ---
 
-# ⚠️ Anti-Patterns to Avoid (Critical)
+## Anti-Patterns to Avoid (Critical)
 
 * Business logic in routes
 * DB queries in controllers
@@ -206,7 +206,7 @@ The agent MUST adapt based on project maturity:
 
 ---
 
-# 🚀 Refactoring Rules
+## Refactoring Rules
 
 * Prefer incremental changes
 * Preserve functionality
@@ -236,7 +236,7 @@ A correct MVC implementation:
 
 ---
 
-# ❌ Invalid MVC (Examples)
+## Invalid MVC (Examples)
 
 * Controller querying database directly
 * Routes containing business logic
@@ -244,17 +244,17 @@ A correct MVC implementation:
 
 ---
 
-# ✅ Valid MVC (Example Flow)
+## Valid MVC (Example Flow)
 
 Route → Controller → Model → Controller → Response
 
 ---
 
-# 🧠 Golden Rule
+## Golden Rule
 
 If a file does more than one responsibility:
 
-➡️ It is NOT MVC-compliant
+It is NOT MVC-compliant
 
 [1]: https://www.techtarget.com/whatis/definition/Model-View-ViewModel?utm_source=chatgpt.com "What is model-view-controller (MVC)? | Definition from TechTarget"
 [2]: https://www.codecademy.com/article/mvc-architecture-model-view-controller?utm_source=chatgpt.com "MVC Architecture Explained: Model, View, Controller | Codecademy"
