@@ -399,7 +399,7 @@ router.post('/enroll', async (req, res) => {
 const sqlite3 = require('sqlite3');
 
 app.post('/users', (req, res) => {
-    const db = new sqlite3.Database(':memory:');  // ❌ Nova conexão a cada request!
+    const db = new sqlite3.Database(':memory:');  // WRONG: Nova conexão a cada request!
     db.run('INSERT INTO users ...', (err) => {
         res.json({ok: true});
     });
@@ -411,7 +411,7 @@ app.post('/users', (req, res) => {
 ```javascript
 // config/database.js
 const sqlite3 = require('sqlite3');
-const db = new sqlite3.Database('./app.db');  // ✅ Persistent, single instance
+const db = new sqlite3.Database('./app.db');  // CORRECT: Persistent, single instance
 
 module.exports = db;
 
@@ -565,15 +565,15 @@ async function hashPassword(pwd) {
 ## Antes (Python/Flask)
 
 ```python
-from flask.ext.sqlalchemy import SQLAlchemy  # ❌ Deprecated
-from flask.ext.cors import CORS              # ❌ Deprecated
+from flask.ext.sqlalchemy import SQLAlchemy  # DEPRECATED: Old syntax
+from flask.ext.cors import CORS              # DEPRECATED: Old syntax
 ```
 
 ## Depois (Python/Flask)
 
 ```python
-from flask_sqlalchemy import SQLAlchemy  # ✅ Current
-from flask_cors import CORS              # ✅ Current
+from flask_sqlalchemy import SQLAlchemy  # CORRECT: Current syntax
+from flask_cors import CORS              # CORRECT: Current syntax
 ```
 
 ---
