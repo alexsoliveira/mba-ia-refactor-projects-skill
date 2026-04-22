@@ -45,10 +45,11 @@ References:
 
 ## Report Persistence Rules (mandatory)
 
-- At the end of Phase 2, persist only one report file for the current project:
-  - `code-smells-project` -> `reports/audit-project-1.md`
-  - `ecommerce-api-legacy` -> `reports/audit-project-2.md`
-  - `task-manager-api` -> `reports/audit-project-3.md`
+- At the end of Phase 2, persist only one report file for the current project in the repository root `reports/` directory (never inside project-local folders like `code-smells-project/reports/`):
+  - `code-smells-project` -> `<REPO_ROOT>/reports/audit-project-1.md`
+  - `ecommerce-api-legacy` -> `<REPO_ROOT>/reports/audit-project-2.md`
+  - `task-manager-api` -> `<REPO_ROOT>/reports/audit-project-3.md`
+- Resolve `<REPO_ROOT>` as the directory that contains `AGENTS.md` for this challenge repository.
 - Do not create or overwrite other `reports/audit-project-*.md` files in the same run.
 - If project identity cannot be resolved confidently, stop and ask for clarification before writing any report file.
 
