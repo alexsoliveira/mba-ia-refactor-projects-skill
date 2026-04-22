@@ -239,6 +239,8 @@ Total Findings: [N]
   - MEDIUM: [N]
   - LOW: [N]
 
+================================
+
 Proceed with refactoring (Phase 3)? [y/n]
 ```
 
