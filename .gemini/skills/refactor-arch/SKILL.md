@@ -31,6 +31,7 @@ References:
 - No preamble before Phase 1 template output.
 - Use exact Phase 1 field order and labels.
 - No narrative text between the end of Phase 1 and the start of Phase 2.
+- Do not use emojis or decorative symbols in phase outputs.
 - Phase 2 findings must be sorted by severity: CRITICAL, HIGH, MEDIUM, LOW.
 - Every finding must include exact file and line or line range.
 - Include deprecated API detection when applicable.
@@ -80,9 +81,10 @@ Requirements:
 - Minimum 5 findings.
 - Severity floor for compliance: at least 2 MEDIUM and at least 2 LOW findings.
 - Findings sorted by severity (CRITICAL -> LOW).
-- Each finding includes: title, file path, exact line info, short code snippet, impact.
+- Each finding includes: `### [SEVERITY] Title`, `File: path, Line/Lines`, 3-5 line snippet, `Impact:`.
 - Include deprecated API finding if applicable.
 - Use markdown summary table only. Do not use ASCII/box-drawing tables.
+- Do not include proposed refactoring plan text in Phase 2.
 - End with this exact prompt and stop:
 
 ```
@@ -93,6 +95,8 @@ No mutation is allowed before user confirmation.
 
 Compliance gate (mandatory before printing Phase 2):
 - If `MEDIUM < 2` or `LOW < 2`, continue auditing and do not print final Phase 2 output yet.
+- If any finding lacks exact file + line/lines, continue auditing and do not print final Phase 2 output yet.
+- If output contains narrative or emojis, regenerate output before presenting to user.
 
 ## PHASE 3 - REFACTORING (only after explicit confirmation)
 
