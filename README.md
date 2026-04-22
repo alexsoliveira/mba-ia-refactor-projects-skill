@@ -277,65 +277,70 @@ Para cada projeto refatorado, valide o seguinte checklist:
 
 ### Projeto 1: code-smells-project (Python/Flask — API de E-commerce)
 
-#### [CRITICAL] Hardcoded Credentials com Fallback Inseguro
-- **Arquivo:** [app.py](app.py#L9)
-- **Linhas:** 9
-- **Problema:** `app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-key-keep-it-safe")` — embora use variável de ambiente, o fallback inseguro pode ser usado em produção se a env não estiver configurada, expondo credenciais
-- **Impacto:** Session hijacking, falsificação de tokens
+#### [CRITICAL] Segredos Hardcoded e Debug Ativado em Runtime
+- **Arquivo:** [code-smells-project/app.py](code-smells-project/app.py#L6-L8)
+- **Linhas:** 6-8
+- **Problema:** A aplicação fixa `SECRET_KEY` no código e força `DEBUG = True` em runtime:
+  ```python
+  app = Flask(__name__)
+  app.config["SECRET_KEY"] = "minha-chave-super-secreta-123"
+  app.config["DEBUG"] = True
+  ```
+- **Impacto:** Facilita exposição indevida em ambientes produtivos e enfraquece a proteção de sessão
 - **Classificação:** CRITICAL
 
 #### [CRITICAL] Consultas SQL em Loop (N+1 Query Problem)
-- **Arquivo:** [models.py](models.py#L98-L125)
-- **Linhas:** 98-125
-- **Problema:** Funções `get_pedidos_usuario()` e `get_todos_pedidos()` fazem queries por item dentro de loops aninhados
+- **Arquivo:** [code-smells-project/models.py](code-smells-project/models.py#L187-L193)
+- **Linhas:** 187-193
+- **Problema:** A hidratação dos pedidos faz queries adicionais para itens e nomes de produtos dentro de loops, ampliando o número de acessos ao banco conforme a resposta cresce
 - **Código:**
   ```python
-  for row in rows:  # Loop 1
-      cursor_items = db.cursor()
-      cursor_items.execute("SELECT ... FROM itens_pedido WHERE pedido_id = ?", ...)  # Query N
-      for item in itens:  # Loop 2
-          ...
+  cursor2 = db.cursor()
+  cursor2.execute("SELECT * FROM itens_pedido WHERE pedido_id = " + str(row["id"]))
+  itens = cursor2.fetchall()
+  for item in itens:
+      cursor3 = db.cursor()
   ```
-- **Impacto:** Degradação severa de performance com muitos pedidos; 1 query raiz + N queries por pedido (ex: 100 pedidos = 101 queries)
+- **Impacto:** O tempo de resposta cresce com quantidade de pedidos e itens, degradando performance sob carga
 - **Classificação:** CRITICAL
 
 #### [HIGH] Lógica de Negócio Desestruturada — Sem Camada Service
-- **Arquivo:** [models.py](models.py#L1-200) + [controllers.py](controllers.py#L1-200)
-- **Linhas:** Vários
-- **Problema:** Controllers chamam diretamente funções de models que fazem queries; não há Service Layer ou Repository Pattern. Lógica de desconto hardcoded em models.py:146-153
-- **Impacto:** Impossível testar Controller sem BD; mudanças em BD quebram Controllers
+- **Arquivo:** [code-smells-project/controllers.py](code-smells-project/controllers.py#L203-L210)
+- **Linhas:** 203-210
+- **Problema:** O fluxo de criação de pedido acopla diretamente controller, persistência e side effects operacionais, sem uma camada intermediária para orquestração
+- **Impacto:** A manutenção do fluxo HTTP fica frágil e os testes ficam mais difíceis de isolar
 - **Classificação:** HIGH
 
 #### [MEDIUM] Magic Numbers e Strings Sem Constantes
-- **Arquivo:** [models.py](models.py#L146-L153)
-- **Linhas:** 146-153
-- **Problema:** Descontos hardcoded (10%, 5%, 2%) e limiares (10000, 5000, 1000) sem constantes isoladas
+- **Arquivo:** [code-smells-project/models.py](code-smells-project/models.py#L256-L262)
+- **Linhas:** 256-262
+- **Problema:** Regras de desconto usam limiares e percentuais hardcoded (10000, 5000, 1000, 10%, 5%, 2%) sem extração para constantes
   ```python
   if faturamento > 10000:
       desconto = faturamento * 0.1
   ```
-- **Impacto:** Difícil entender regra de negócio; mudanças devem ser feitas em múltiplos lugares
+- **Impacto:** As regras ficam opacas e qualquer ajuste exige edição direta da lógica
 - **Classificação:** MEDIUM
 
-#### [MEDIUM] Duplicação de Serialização de Dados
-- **Arquivo:** [controllers.py](controllers.py#L120-L160) + [models.py](models.py#L5-L8)
-- **Linhas:** Vários
-- **Problema:** Conversão `dict(row)` repetida em múltiplas funções; não há centralização de serialização
-- **Impacto:** Inconsistências na serialização; mudanças devem ser propagadas em N lugares
+#### [MEDIUM] Duplicação de Validação Entre Criação e Atualização de Produto
+- **Arquivo:** [code-smells-project/controllers.py](code-smells-project/controllers.py#L28-L35) + [code-smells-project/controllers.py](code-smells-project/controllers.py#L72-L79)
+- **Linhas:** 28-35 e 72-79
+- **Problema:** As validações de produto são repetidas entre handlers de criação e atualização, exigindo manutenção paralela
+- **Impacto:** Regras podem divergir ao longo do tempo e introduzir comportamento inconsistente
 - **Classificação:** MEDIUM
 
 #### [LOW] Status como Magic Strings
-- **Arquivo:** [controllers.py](controllers.py#L135) + [models.py](models.py#L160)
-- **Linhas:** Vários
-- **Problema:** Status de pedidos como strings simples ("pendente", "aprovado", "cancelado") sem enums ou constantes
-- **Impacto:** Erros de digitação; sem validação em tempo de compilação
+- **Arquivo:** [code-smells-project/controllers.py](code-smells-project/controllers.py#L240-L247)
+- **Linhas:** 240-247
+- **Problema:** O fluxo de atualização de pedido usa strings literais como `"pendente"`, `"aprovado"`, `"enviado"`, `"entregue"` e `"cancelado"` em vez de centralizar esses valores
+- **Impacto:** A lógica fica mais suscetível a typos e a mudanças manuais espalhadas
 - **Classificação:** LOW
 
 #### [LOW] Inconsistência na Nomenclatura
-- **Arquivo:** [database.py](database.py#L1-80)
-- **Linhas:** Vários
-- **Problema:** Mistura de nomenclaturas: `get_db()`, `listar_produtos()` (português/inglês), `criar_pedido()`, `atualizar_status_pedido()`
-- **Impacto:** Dificuldade manutenção; base de código confusa
+- **Arquivo:** [code-smells-project/database.py](code-smells-project/database.py#L4-L8)
+- **Linhas:** 4-8
+- **Problema:** A base mistura termos em português e inglês, por exemplo `db_connection`, `db_path` e `get_db()` convivendo com rotas e funções nomeadas em português
+- **Impacto:** A leitura da base fica menos consistente e o onboarding mais custoso
 - **Classificação:** LOW
 
 ---

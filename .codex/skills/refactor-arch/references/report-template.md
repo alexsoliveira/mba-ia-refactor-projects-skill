@@ -19,12 +19,18 @@ Use this template shape for every audit.
 - Keep markdown headings exactly (`## Summary`, `## Findings`).
 - Keep findings headings exactly (`### [SEVERITY] Title`).
 - Keep summary table as markdown pipe table (`| Severity | Count |`), never ASCII box table.
+- Keep every source snippet inside fenced markdown code blocks. Use a language tag such as `python`, `javascript`, `typescript`, or `sql` when confidently known.
+- Keep source strings readable; broken encoding or mojibake is invalid.
+- Treat the saved report location as part of the output contract: the final file must live in the repository root `reports/` directory, never in a project-local `reports/` folder.
 - Required marker check before presenting output:
   - Must contain: `## Summary`, `## Findings`, `| Severity | Count |`, and all four headings `### [CRITICAL]`, `### [HIGH]`, `### [MEDIUM]`, `### [LOW]`.
   - Must not contain: `┌┐└┘├┤┬┴┼│─`.
   - Must not contain Unicode dash separators: `—`, `–`, `———`.
   - Must contain summary total exactly as `**Total Findings: [N]**`.
   - Must contain both separator lines around `PHASE 2 COMPLETE`.
+  - In this challenge repo, when the root `README.md` contains manual-analysis findings for the current project, at least 5 audit findings must overlap with that section.
+  - Must not contain mojibake such as `Ã`, `Â`, `�`, or visibly corrupted source strings.
+  - Must be persisted to `<REPO_ROOT>/reports/audit-project-<N>.md` for the current project, not to a project-local `reports/` folder.
   - If check fails, regenerate and do not present invalid output.
 
 ## Literal Template
@@ -57,7 +63,9 @@ Files:   [N] analyzed | ~[LOC] LOC total
 
 File: [path/to/file], Line: [N] or Lines: [N-M]
 
-[3-5 line code snippet showing the issue]
+```[language]
+[3-5 line code snippet showing the issue, including the exact offending line(s)]
+```
 
 Impact: [one concise impact sentence]
 
@@ -67,7 +75,9 @@ Impact: [one concise impact sentence]
 
 File: [path/to/file], Line: [N] or Lines: [N-M]
 
-[3-5 line code snippet showing the issue]
+```[language]
+[3-5 line code snippet showing the issue, including the exact offending line(s)]
+```
 
 Impact: [one concise impact sentence]
 
@@ -77,7 +87,9 @@ Impact: [one concise impact sentence]
 
 File: [path/to/file], Line: [N] or Lines: [N-M]
 
-[3-5 line code snippet showing the issue]
+```[language]
+[3-5 line code snippet showing the issue, including the exact offending line(s)]
+```
 
 Impact: [one concise impact sentence]
 
@@ -87,7 +99,9 @@ Impact: [one concise impact sentence]
 
 File: [path/to/file], Line: [N] or Lines: [N-M]
 
-[3-5 line code snippet showing the issue]
+```[language]
+[3-5 line code snippet showing the issue, including the exact offending line(s)]
+```
 
 Impact: [one concise impact sentence]
 
@@ -123,6 +137,11 @@ Proceed with refactoring (Phase 3)? [y/n]
 - Unicode dash separators (`—`, `–`, `———`) are invalid; use ASCII only.
 - The footer must include the second `================================` line after `PHASE 2 COMPLETE`.
 - No text is allowed after `Proceed with refactoring (Phase 3)? [y/n]`.
+- The saved report file must be the repository-root path for the current project:
+  - `code-smells-project` -> `<REPO_ROOT>/reports/audit-project-1.md`
+  - `ecommerce-api-legacy` -> `<REPO_ROOT>/reports/audit-project-2.md`
+  - `task-manager-api` -> `<REPO_ROOT>/reports/audit-project-3.md`
+- Saving under `code-smells-project/reports/`, `ecommerce-api-legacy/reports/`, or `task-manager-api/reports/` is invalid.
 - If `MEDIUM < 2` or `LOW < 2`, the audit is invalid and must be regenerated.
 - If finding headings are not in `### [SEVERITY] Title` format, the audit is invalid.
 - If summary is not markdown pipe table format, the audit is invalid.
@@ -130,6 +149,10 @@ Proceed with refactoring (Phase 3)? [y/n]
 - Every finding must use exact line references only (`Line: N` or `Lines: N-M`), without ellipsis.
 - Do not use bracket list style in Phase 1 values (e.g., `[dep1, dep2]`); use comma-separated text.
 - Code snippets must be real source excerpts (3-5 lines), not placeholders (`...`, `# ...`) or pseudo-code.
+- Code snippets must always be fenced with triple backticks; plain inline snippets are invalid.
+- Code snippets must include the exact offending line(s), not only surrounding setup lines.
+- Source strings must remain readable; mojibake or broken decoding is invalid.
+- If source text appears with broken decoding, re-read and regenerate using readable UTF-8 output before persisting the report.
 - Avoid overly broad ranges like `Lines: 1-200`; use the smallest precise range that supports the finding.
 - Final severity floor is mandatory: `MEDIUM >= 2` and `LOW >= 2`. Otherwise regenerate the audit.
 - The summary table must be this markdown shape (no ASCII table):
@@ -138,6 +161,8 @@ Proceed with refactoring (Phase 3)? [y/n]
   - rows for `CRITICAL`, `HIGH`, `MEDIUM`, `LOW`
 - If output contains any box-drawing characters (`┌┐└┘├┤┬┴┼│─`), the audit is invalid and must be regenerated.
 - Plain `Summary`/`Findings` without `##` is invalid and must be regenerated.
+- For this challenge repo, if the root `README.md` contains a manual-analysis section for the current project, at least 5 reported findings must map back to that section before the report is considered valid.
+- Prefer README-aligned findings before supplemental findings when both are supported by source.
 
 ## Cross-Link
 

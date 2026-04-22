@@ -49,6 +49,7 @@ After: framework-supported modern APIs and package versions.
 - Apply smallest safe change set first.
 - Keep endpoint contract stable.
 - Validate boot and key endpoints after each major transformation group.
+- After successful validation, synchronize the repository root `README.md` so challenge deliverables and evidence stay consistent with the refactored code and saved audit report.
 
 ## Cross-Link
 

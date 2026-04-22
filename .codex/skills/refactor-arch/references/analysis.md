@@ -56,6 +56,7 @@ Infer from:
 - route names/endpoints
 - model/entity names
 - README project description
+- root challenge `README.md` manual-analysis section for current project, when present
 
 Examples:
 - `/produtos`, `/pedidos` => E-commerce API
@@ -106,3 +107,16 @@ Output format:
 
 The final Phase 1 text must match the literal structure in `SKILL.md`.
 Do not add fields or narrative text.
+
+## Challenge Reminder
+
+In this repository, the root `README.md` is not only descriptive context. It is also a compliance reference for Phase 2 overlap checks.
+
+## Report Path Reminder
+
+When Phase 2 is persisted, the report path must be resolved relative to the repository root that contains `AGENTS.md`:
+- `code-smells-project` -> `<REPO_ROOT>/reports/audit-project-1.md`
+- `ecommerce-api-legacy` -> `<REPO_ROOT>/reports/audit-project-2.md`
+- `task-manager-api` -> `<REPO_ROOT>/reports/audit-project-3.md`
+
+Do not persist reports to project-local folders such as `code-smells-project/reports/`.

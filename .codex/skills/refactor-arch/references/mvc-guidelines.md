@@ -59,6 +59,7 @@ src/
 - Application boots successfully.
 - Existing endpoints preserve behavior.
 - Cross-layer violations found in Phase 2 are removed or reduced.
+- Repository documentation should stay consistent with the delivered architecture and validation evidence.
 
 ## Cross-Link
 

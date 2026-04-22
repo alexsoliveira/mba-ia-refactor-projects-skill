@@ -24,6 +24,7 @@ References:
 - `references/report-template.md`
 - `references/mvc-guidelines.md`
 - `references/refactoring-playbook.md`
+- `references/readme-update.md`
 
 ## Global Rules
 
@@ -31,6 +32,19 @@ References:
 - Invocation scope is single-project only:
   - Analyze, audit, and refactor only the project currently targeted by invocation path/CWD.
   - Do not run phases for sibling projects in the same invocation.
+- For this challenge repository, treat the root `README.md` manual analysis as a compliance source for Phase 2:
+  - Before finalizing the audit, compare findings against the `README.md` section for the current project.
+  - The Phase 2 output must include at least 5 findings that correspond to manually documented issues for the current project when that section exists.
+  - Prefer README-aligned findings before adding extra valid findings that are not part of the manual analysis.
+  - If the README wording is stale but the same underlying issue still exists in source, keep the source-true description while preserving overlap with the manual-analysis theme.
+  - This README alignment is a repository-specific compliance layer; it must not replace stack-agnostic detection heuristics or hardcode framework-specific logic into the skill.
+- For this challenge repository, treat the root `README.md` pending placeholder sections as Phase 3 documentation debt:
+  - `## Construção da Skill`
+  - `## Resultados`
+  - `## Como Executar`
+  - When those sections still contain placeholder text such as `Descreva aqui`, Phase 3 must replace the placeholders with real repository-specific documentation.
+  - Preserve the existing `## Análise Manual dos Projetos` content and do not overwrite unrelated sections.
+  - Update shared README sections incrementally across runs: merge with existing content, do not duplicate headings, and only add or refresh the current project's result/checklist subsection when working on a single project.
 - No preamble before Phase 1 template output.
 - Use exact Phase 1 field order and labels.
 - No narrative text between the end of Phase 1 and the start of Phase 2.
@@ -52,6 +66,9 @@ References:
 - Resolve `<REPO_ROOT>` as the directory that contains `AGENTS.md` for this challenge repository.
 - Do not create or overwrite other `reports/audit-project-*.md` files in the same run.
 - If project identity cannot be resolved confidently, stop and ask for clarification before writing any report file.
+- Before writing the report, resolve and verify the final absolute output path.
+- If the resolved path is inside a project-local folder such as `code-smells-project/reports/`, `ecommerce-api-legacy/reports/`, or `task-manager-api/reports/`, do not write there; correct the target to `<REPO_ROOT>/reports/...` first.
+- Treat writing to a project-local `reports/` directory as a compliance failure.
 
 ## PHASE 1 - PROJECT ANALYSIS (must run first)
 
@@ -85,6 +102,7 @@ Constraints:
 - No text before or after template block.
 - Keep field order exactly as shown.
 - The first and last separator lines in Phase 1 must be exactly `================================`.
+- The line immediately after `PHASE 1: PROJECT ANALYSIS` must be exactly `================================`.
 - After Phase 1 closing separator, the next non-empty line must be the Phase 2 header.
 - `Dependencies` and `DB tables` must be comma-separated plain text without brackets (`[]`).
 - `Source files` must count only executable backend source files (exclude docs, lock/manifests, DB files, env files).
@@ -92,6 +110,7 @@ Constraints:
 Phase 1 compliance gate (mandatory before printing):
 - If source-file count includes non-source artifacts (e.g., `README.md`, `requirements.txt`, `.db`), recalculate before printing.
 - If current project is `code-smells-project` baseline and `Source files != 4`, recalculate and regenerate Phase 1.
+- If the separator line immediately below `PHASE 1: PROJECT ANALYSIS` is missing, regenerate Phase 1 before presenting.
 
 ## PHASE 2 - ARCHITECTURE AUDIT (must run second)
 
@@ -130,6 +149,11 @@ Requirements:
 - Severity floor for compliance: at least 2 MEDIUM and at least 2 LOW findings.
 - Findings sorted by severity (CRITICAL -> LOW).
 - Each finding includes: `### [SEVERITY] Title`, `File: path, Line/Lines`, 3-5 line snippet, `Impact:`.
+- Every finding snippet must be wrapped in fenced markdown code blocks with a language tag when the language is known.
+- For this challenge repo, at least 5 findings must overlap with the current project's manual-analysis issues documented in the root `README.md`.
+- When multiple valid findings are available, prefer README-overlap findings over supplemental findings once the minimum severity floor is satisfied.
+- Snippets must include the exact offending line or lines that justify the finding, not just nearby setup context.
+- Output text must preserve readable source strings and UTF-8 characters; mojibake such as `Ã`, `Â`, or replacement-garbage sequences is invalid.
 - Include deprecated API finding if applicable.
 - Use markdown summary table only. Do not use ASCII/box-drawing tables.
 - Do not include proposed refactoring plan text in Phase 2.
@@ -160,6 +184,11 @@ No mutation is allowed before user confirmation.
 Compliance gate (mandatory before printing Phase 2):
 - If `MEDIUM < 2` or `LOW < 2`, continue auditing and do not print final Phase 2 output yet.
 - If any finding lacks exact file + line/lines, continue auditing and do not print final Phase 2 output yet.
+- If fewer than 5 findings overlap with the current project's manual-analysis issues in the root `README.md`, continue auditing and replace lower-priority supplemental findings before printing.
+- If any snippet is not inside fenced markdown code blocks, regenerate the report before printing.
+- If any snippet omits the core offending line(s) that justify the finding, regenerate the report before printing.
+- If output contains mojibake or visibly corrupted source strings, regenerate the report before printing.
+- If the intended persisted report path is not the repository root `reports/audit-project-<N>.md` target for the current project, correct the path before printing.
 - If output contains narrative or emojis, regenerate output before presenting to user.
 - If output uses ASCII/box table characters (`┌ ┬ ┐ ├ ┼ ┤ └ ┴ ┘`), regenerate with markdown table.
 - If any finding is formatted as `[SEVERITY] Title` without `###`, regenerate before presenting.
@@ -181,10 +210,15 @@ Compliance gate (mandatory before printing Phase 2):
 Hard failure conditions (must not present output to user):
 - If `LOW < 2`, do not print Phase 2; continue analysis until at least 2 LOW findings are documented.
 - If `MEDIUM < 2`, do not print Phase 2; continue analysis until at least 2 MEDIUM findings are documented.
+- If the root `README.md` has manual-analysis findings for the current project and fewer than 5 audit findings overlap with them, do not print Phase 2.
 - If metadata block is missing (`Project`, `Stack`, `Files`), do not print Phase 2.
 - If summary table is not markdown pipe table, do not print Phase 2.
 - If any finding title is not prefixed with `### [SEVERITY]`, do not print Phase 2.
 - If any finding does not include exact line or exact line range (`Line: N` or `Lines: N-M`), do not print Phase 2.
+- If any finding snippet is not fenced with triple backticks, do not print Phase 2.
+- If any finding snippet does not show the exact line(s) that demonstrate the problem, do not print Phase 2.
+- If output contains mojibake or broken character decoding, do not print Phase 2.
+- If the report is persisted anywhere other than `<REPO_ROOT>/reports/audit-project-<N>.md` for the current project, do not consider Phase 2 complete.
 - If any field value in Phase 1 uses bracketed list formatting (e.g., `[a, b, c]`), do not print; regenerate Phase 1.
 - If any finding snippet is not an actual excerpt from source code, do not print Phase 2.
 - If any finding uses non-specific references instead of precise ranges, do not print Phase 2.
@@ -253,6 +287,39 @@ Pre-output strict checks (run immediately before final Phase 2 print):
 6. Verify summary contains exact markdown bold total line: `**Total Findings: [N]**`.
 7. Verify footer contains both separator lines around `PHASE 2 COMPLETE`.
 8. Verify output contains no Unicode dash separators (`—`, `–`, `———`).
+9. Verify every finding snippet is fenced with triple backticks and uses a language tag when confidently known.
+10. Verify every finding snippet includes the exact offending line or lines that justify the finding.
+11. Verify output contains no mojibake or visibly corrupted source strings.
+
+Additional strict check:
+12. Verify at least 5 findings overlap with the root `README.md` manual-analysis issues for the current project, when that section exists.
+
+## Challenge Alignment Hints
+
+Use these only to improve overlap with the repository `README.md`; never invent issues that are absent from source.
+These are semantic categories, not hardcoded implementation signatures. The audit must still infer findings from the current codebase first and only then prefer the best matching README-aligned categories.
+
+- `code-smells-project` expected overlap candidates:
+  - hardcoded credentials or insecure runtime config
+  - N+1 order/item queries
+  - missing layer boundaries or no service layer
+  - duplicated validation or duplicated serialization
+  - magic strings or magic numbers
+  - inconsistent naming
+- `ecommerce-api-legacy` expected overlap candidates:
+  - hardcoded credentials
+  - weak crypto or credential handling
+  - missing auth on critical endpoints
+  - callback hell or inline payment logic
+  - mutable global state
+  - magic strings or poor naming
+- `task-manager-api` expected overlap candidates:
+  - deprecated or insecure hashing
+  - hardcoded secrets or email credentials
+  - blocking notification flow
+  - N+1 queries
+  - duplicated serialization
+  - generic exception handling or magic numbers
 
 ## PHASE 3 - REFACTORING (only after explicit confirmation)
 
@@ -268,11 +335,25 @@ Required outcomes:
 - Keep existing endpoint behavior.
 - Validate application boot.
 - Validate key endpoints respond correctly.
+- Synchronize the root `README.md` using `references/readme-update.md` after validation succeeds.
 
 Validation checklist:
 - App starts without runtime errors.
 - Original endpoints still respond.
 - No refactor step started before Phase 2 confirmation.
+- Root `README.md` no longer contains unresolved placeholder text in the sections covered by the current run.
+
+README synchronization requirements (mandatory during Phase 3 for this challenge repo):
+- Resolve the repository root README as the `README.md` that sits beside `AGENTS.md`.
+- Use `references/readme-update.md` as the content contract for the three sections:
+  - `## Construção da Skill`
+  - `## Resultados`
+  - `## Como Executar`
+- Preserve user-authored content that is already concrete; replace only placeholders, stale boilerplate, or the subsection for the current project when refreshed evidence is available.
+- In `## Resultados`, maintain per-project subsections and update only the current project's audit summary, before/after structure notes, validation checklist, and evidence/log summary for the invoked target project.
+- In `## Como Executar`, keep commands for all 3 projects available once the section is populated; do not narrow the README to only the current project.
+- Do not claim validation that was not actually executed during the current run; when evidence comes from the current run, state it concretely.
+- If Phase 3 validation fails, do not mark checklist items as complete in `README.md`.
 
 ## Safety Gate
 
