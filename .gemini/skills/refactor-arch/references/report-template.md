@@ -97,6 +97,9 @@ Proceed with refactoring (Phase 3)? [y/n]
 - Include deprecated API finding if applicable.
 - Do not propose implementation steps in Phase 2.
 - Stop after the confirmation prompt.
+- Use markdown table format (`| Severity | Count |`) only; ASCII/box tables are invalid.
+- Output at least 2 MEDIUM findings and at least 2 LOW findings before closing Phase 2.
+- Do not print narrative text between Phase 1 completion and the Phase 2 header.
 
 ## Cross-Link
 
