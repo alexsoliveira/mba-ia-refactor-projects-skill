@@ -1,260 +1,65 @@
-# MVC Architecture Guidelines — Refactor Arch Skill
+# MVC Guidelines
 
-This document defines the **target architecture (MVC)** used during Phase 3 (Refactoring).
+Purpose: define the target architecture for Phase 3 refactoring.
 
-The agent MUST transform any codebase into this structure.
+## Target Layers
 
----
+### Model Layer
+- Owns data access and persistence concerns.
+- May include entity-level invariants.
+- Must not read HTTP request objects.
 
-## Objective
+### View/Routes Layer
+- Maps endpoints and HTTP methods.
+- Extracts request parameters.
+- Delegates work to controllers.
+- Must not implement business workflows or raw DB queries.
 
-Ensure the application follows:
+### Controller Layer
+- Orchestrates use cases and business workflows.
+- Calls model/repository/service components.
+- Returns response-ready data to routes.
 
-* Clear separation of concerns
-* Maintainable and testable structure
-* Decoupled layers
-* Predictable data flow
+## Optional Service Layer
 
----
+Service layer is allowed when business logic is complex.
+It should sit between controllers and models/repositories.
 
-## Core Principle
+## Dependency Direction
 
-MVC is based on **Separation of Concerns**, where:
+Routes -> Controllers -> Models/Repositories
 
-* Model: data and business rules
-* View: presentation / routing
-* Controller: orchestration
+Do not invert this direction.
 
-Each layer MUST have a **single responsibility**.
+## Configuration and Security
 
----
+- No hardcoded secrets in source code.
+- Centralize config in environment-backed settings.
+- Keep sensitive internals out of health/status endpoints.
 
-## MVC Layers Definition
+## Error Handling
 
----
+- Centralized error handling is preferred.
+- Keep consistent response contracts.
 
-## 1. Model Layer
+## Suggested Structure
 
-### Responsibility
-
-* Represent application data
-* Encapsulate business rules
-* Handle persistence (DB interaction)
-
-### MUST DO
-
-* Define entities and data structures
-* Perform validation
-* Interact with database
-
-### MUST NOT DO
-
-* Handle HTTP requests
-* Contain routing logic
-* Format responses
-
----
-
-## 2. View / Routes Layer
-
-### Responsibility
-
-* Handle HTTP requests
-* Define endpoints
-* Delegate execution to controllers
-
-### MUST DO
-
-* Map routes (GET, POST, etc.)
-* Extract request parameters
-* Return responses
-
-### MUST NOT DO
-
-* Contain business logic
-* Perform DB queries
-* Contain complex logic
-
----
-
-## 3. Controller Layer
-
-### Responsibility
-
-* Orchestrate application flow
-* Process user input
-* Coordinate between Model and View
-
-### MUST DO
-
-* Call models/services
-* Apply business logic
-* Return formatted responses
-
-### MUST NOT DO
-
-* Direct DB queries (prefer models)
-* Contain UI logic
-* Become a "God class"
-
----
-
-# 🔄 Data Flow (MANDATORY)
-
-1. User → View/Route
-2. View → Controller
-3. Controller → Model
-4. Model → Controller
-5. Controller → View
-6. View → Response
-
-The Controller acts as the **central coordinator** ([Codecademy][2])
-
----
-
-# Target Folder Structure
-
-```bash
+```
 src/
-├── config/
-│   └── settings.*
-├── models/
-│   └── *_model.*
-├── controllers/
-│   └── *_controller.*
-├── views/ or routes/
-│   └── routes.*
-├── middlewares/
-│   └── error_handler.*
-└── app.*  (composition root)
+  config/
+  models/
+  controllers/
+  routes/    # or views/
+  middlewares/
+  app.*
 ```
 
----
+## Validation After Refactor
 
-# Configuration Rules
+- Application boots successfully.
+- Existing endpoints preserve behavior.
+- Cross-layer violations found in Phase 2 are removed or reduced.
 
-* All configuration MUST be externalized
-* No hardcoded values allowed
+## Cross-Link
 
-### Examples:
-
-* Environment variables
-* Config modules
-
----
-
-# 🧩 Naming Conventions
-
-## Models
-
-* `<entity>_model`
-* Example: `user_model.py`
-
-## Controllers
-
-* `<entity>_controller`
-* Example: `user_controller.js`
-
-## Routes
-
-* `<entity>_routes`
-* Example: `user_routes.js`
-
----
-
-# 🔐 Security Rules
-
-* No hardcoded credentials
-* Input validation REQUIRED
-* Centralized error handling
-
----
-
-# 🧪 Testability Rules
-
-* Each layer MUST be independently testable
-* Controllers MUST be testable without HTTP layer
-* Models MUST be testable without controllers
-
----
-
-## Anti-Patterns to Avoid (Critical)
-
-* Business logic in routes
-* DB queries in controllers
-* Mixed responsibilities
-* Global state usage
-
----
-
-# 🔁 Adaptation Rules (IMPORTANT)
-
-The agent MUST adapt based on project maturity:
-
-## Case 1 — Monolithic
-
-* Full restructuring required
-
-## Case 2 — Partial Layered
-
-* Normalize structure
-* Fix violations
-
-## Case 3 — Already Structured
-
-* Improve, do NOT over-refactor
-
----
-
-## Refactoring Rules
-
-* Prefer incremental changes
-* Preserve functionality
-* Maintain API contracts
-* Avoid unnecessary rewrites
-
----
-
-# 📌 Validation Requirements
-
-After refactoring:
-
-* Application MUST boot
-* All endpoints MUST work
-* No regression allowed
-
----
-
-# 🧭 Final Rule
-
-A correct MVC implementation:
-
-✔ Each layer has one responsibility
-✔ No cross-layer violations
-✔ Clear data flow
-✔ Easy to test and maintain
-
----
-
-## Invalid MVC (Examples)
-
-* Controller querying database directly
-* Routes containing business logic
-* Model formatting HTTP responses
-
----
-
-## Valid MVC (Example Flow)
-
-Route → Controller → Model → Controller → Response
-
----
-
-## Golden Rule
-
-If a file does more than one responsibility:
-
-It is NOT MVC-compliant
-
-[1]: https://www.techtarget.com/whatis/definition/Model-View-ViewModel?utm_source=chatgpt.com "What is model-view-controller (MVC)? | Definition from TechTarget"
-[2]: https://www.codecademy.com/article/mvc-architecture-model-view-controller?utm_source=chatgpt.com "MVC Architecture Explained: Model, View, Controller | Codecademy"
+Apply concrete transformations from `references/refactoring-playbook.md`.
