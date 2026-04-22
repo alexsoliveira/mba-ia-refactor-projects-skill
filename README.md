@@ -650,6 +650,18 @@ desafio-skills/
 - Comandos para executar a skill em cada projeto
 - Como validar que a refatoração funcionou
 
+## Construção da Skill
+
+Descreva aqui as decisões de design da skill, a organização do `SKILL.md`, dos arquivos de referência e como a solução foi mantida agnóstica de tecnologia.
+
+## Resultados
+
+Descreva aqui o resumo dos relatórios gerados, a comparação antes/depois das estruturas dos projetos e o checklist de validação preenchido para cada execução.
+
+## Como Executar
+
+Descreva aqui os pré-requisitos, os comandos para invocar a skill em cada projeto e como validar que a refatoração funcionou.
+
 ### Ordem de execução sugerida
 
 **1. Analisar os projetos manualmente**
