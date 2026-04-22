@@ -78,6 +78,19 @@ Layered/MVC-like:
 
 Count backend source files analyzed (exclude tests, vendor, node_modules, virtual env).
 
+Counting rules:
+- Count only executable backend source files (`.py`, `.js`, `.ts`).
+- Exclude non-source artifacts: `README*`, `*.md`, `requirements*.txt`, `package-lock.json`, `*.db`, `*.sqlite`, `.env*`.
+- Exclude infra/build folders: `node_modules`, `.venv`, `venv`, `dist`, `build`, `coverage`, `.git`.
+- Do not count generated files or migration snapshots unless they are actively executed by the app entrypoint.
+
+Project-specific sanity check:
+- For `code-smells-project` baseline (pre-refactor), expected source file count is `4`:
+  - `app.py`
+  - `controllers.py`
+  - `models.py`
+  - `database.py`
+
 ## 7) DB Tables Detection
 
 SQL projects:
