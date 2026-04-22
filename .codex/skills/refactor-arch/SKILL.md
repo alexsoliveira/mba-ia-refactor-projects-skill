@@ -28,16 +28,29 @@ References:
 ## Global Rules
 
 - Technology agnostic: support Python/Flask and Node.js/Express at minimum.
+- Invocation scope is single-project only:
+  - Analyze, audit, and refactor only the project currently targeted by invocation path/CWD.
+  - Do not run phases for sibling projects in the same invocation.
 - No preamble before Phase 1 template output.
 - Use exact Phase 1 field order and labels.
 - No narrative text between the end of Phase 1 and the start of Phase 2.
 - Do not use emojis or decorative symbols in phase outputs.
+- Use ASCII-only separators and punctuation in phase outputs (no Unicode dash variants).
 - Phase 2 findings must be sorted by severity: CRITICAL, HIGH, MEDIUM, LOW.
 - Every finding must include exact file and line or line range.
 - Include deprecated API detection when applicable.
 - End Phase 2 with confirmation prompt and stop.
 - Only proceed to Phase 3 when user responds `y` or `yes`.
 - Preserve behavior and endpoints after refactor.
+
+## Report Persistence Rules (mandatory)
+
+- At the end of Phase 2, persist only one report file for the current project:
+  - `code-smells-project` -> `reports/audit-project-1.md`
+  - `ecommerce-api-legacy` -> `reports/audit-project-2.md`
+  - `task-manager-api` -> `reports/audit-project-3.md`
+- Do not create or overwrite other `reports/audit-project-*.md` files in the same run.
+- If project identity cannot be resolved confidently, stop and ask for clarification before writing any report file.
 
 ## PHASE 1 - PROJECT ANALYSIS (must run first)
 
@@ -103,6 +116,13 @@ Phase 2 non-negotiable output contract (highest priority):
 - The output MUST NOT contain box-table characters:
   - `┌┐└┘├┤┬┴┼│─`
 - If any required marker is missing, or any forbidden character appears, regenerate silently and do not present the invalid version.
+- Additional required format checks before presenting:
+  - No Unicode dash separators (`—`, `–`, `———`) anywhere in Phase 2 output.
+  - Summary total line must be exactly `**Total Findings: [N]**`.
+  - Footer must include the second separator line after `PHASE 2 COMPLETE`:
+    - `================================`
+    - `PHASE 2 COMPLETE`
+    - `================================`
 
 Requirements:
 - Minimum 5 findings.
@@ -143,8 +163,11 @@ Compliance gate (mandatory before printing Phase 2):
 - If output uses ASCII/box table characters (`┌ ┬ ┐ ├ ┼ ┤ └ ┴ ┘`), regenerate with markdown table.
 - If any finding is formatted as `[SEVERITY] Title` without `###`, regenerate before presenting.
 - If `PHASE 2 COMPLETE` block is missing, regenerate before presenting.
+- If separator line immediately after `PHASE 2 COMPLETE` is missing, regenerate before presenting.
 - If Phase 2 is missing `Project:`, `Stack:`, or `Files:` lines, regenerate before presenting.
 - If `## Summary`, `## Findings`, or `**Total Findings: [N]**` is missing, regenerate before presenting.
+- If summary contains `Total Findings: [N]` without markdown bold (`**...**`), regenerate before presenting.
+- If output contains Unicode dash separators (`—`, `–`, `———`), regenerate before presenting.
 - If any text appears after `Proceed with refactoring (Phase 3)? [y/n]`, regenerate before presenting.
 - If `Summary`/`Findings` appear without markdown level-2 headings (`##`), regenerate before presenting.
 - If any finding line reference contains ellipsis (`...`) or missing line numbers, regenerate before presenting.
@@ -164,6 +187,9 @@ Hard failure conditions (must not present output to user):
 - If any field value in Phase 1 uses bracketed list formatting (e.g., `[a, b, c]`), do not print; regenerate Phase 1.
 - If any finding snippet is not an actual excerpt from source code, do not print Phase 2.
 - If any finding uses non-specific references instead of precise ranges, do not print Phase 2.
+- If summary is missing exact `**Total Findings: [N]**`, do not print Phase 2.
+- If footer is missing the second `================================` line after `PHASE 2 COMPLETE`, do not print Phase 2.
+- If output contains Unicode dash separators (`—`, `–`, `———`), do not print Phase 2.
 
 Literal Phase 2 skeleton to enforce (must match shape):
 ```
@@ -221,6 +247,9 @@ Pre-output strict checks (run immediately before final Phase 2 print):
 3. If any box-drawing character exists (`┌┐└┘├┤┬┴┼│─`), reject output and regenerate using markdown table.
 4. Verify headings are exactly `## Summary` and `## Findings` (not plain `Summary`/`Findings`).
 5. Verify finding titles begin with `### [` (no plain `[CRITICAL]` form).
+6. Verify summary contains exact markdown bold total line: `**Total Findings: [N]**`.
+7. Verify footer contains both separator lines around `PHASE 2 COMPLETE`.
+8. Verify output contains no Unicode dash separators (`—`, `–`, `———`).
 
 ## PHASE 3 - REFACTORING (only after explicit confirmation)
 

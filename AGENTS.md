@@ -206,7 +206,10 @@ Both MUST work together.
 
 To stay fully aligned with `README.md`, the agent MUST also enforce:
 
-* Execute the workflow on all 3 target projects:
+* Scope per invocation:
+  * Each skill execution MUST process only the current target project.
+  * Do not process sibling projects in the same invocation.
+* Across the full challenge lifecycle, execute the workflow on all 3 target projects:
   * `code-smells-project/`
   * `ecommerce-api-legacy/`
   * `task-manager-api/`
@@ -214,10 +217,11 @@ To stay fully aligned with `README.md`, the agent MUST also enforce:
 * During Phase 2, produce at least 5 findings per project.
 * During Phase 2, include at least 1 finding of severity CRITICAL or HIGH.
 * During Phase 3, preserve endpoint behavior and ensure application boot succeeds.
-* Save Phase 2 audit outputs in:
-  * `reports/audit-project-1.md`
-  * `reports/audit-project-2.md`
-  * `reports/audit-project-3.md`
+* Save only the current project's Phase 2 audit output per invocation:
+  * `code-smells-project/` -> `reports/audit-project-1.md`
+  * `ecommerce-api-legacy/` -> `reports/audit-project-2.md`
+  * `task-manager-api/` -> `reports/audit-project-3.md`
+* Never create or overwrite report files for non-current projects in the same run.
 
 ---
 

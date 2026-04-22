@@ -22,6 +22,9 @@ Use this template shape for every audit.
 - Required marker check before presenting output:
   - Must contain: `## Summary`, `## Findings`, `| Severity | Count |`, and all four headings `### [CRITICAL]`, `### [HIGH]`, `### [MEDIUM]`, `### [LOW]`.
   - Must not contain: `┌┐└┘├┤┬┴┼│─`.
+  - Must not contain Unicode dash separators: `—`, `–`, `———`.
+  - Must contain summary total exactly as `**Total Findings: [N]**`.
+  - Must contain both separator lines around `PHASE 2 COMPLETE`.
   - If check fails, regenerate and do not present invalid output.
 
 ## Literal Template
@@ -117,6 +120,8 @@ Proceed with refactoring (Phase 3)? [y/n]
 - The `PHASE 2 COMPLETE` block with severity totals is mandatory before the confirmation prompt.
 - `Project:`, `Stack:`, and `Files:` lines are mandatory in metadata section.
 - `**Total Findings: [N]**` in summary and `Total Findings: [N]` in footer are both mandatory.
+- Unicode dash separators (`—`, `–`, `———`) are invalid; use ASCII only.
+- The footer must include the second `================================` line after `PHASE 2 COMPLETE`.
 - No text is allowed after `Proceed with refactoring (Phase 3)? [y/n]`.
 - If `MEDIUM < 2` or `LOW < 2`, the audit is invalid and must be regenerated.
 - If finding headings are not in `### [SEVERITY] Title` format, the audit is invalid.
