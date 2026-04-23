@@ -657,15 +657,229 @@ desafio-skills/
 
 ## Construção da Skill
 
-Descreva aqui as decisões de design da skill, a organização do `SKILL.md`, dos arquivos de referência e como a solução foi mantida agnóstica de tecnologia.
+A skill `refactor-arch` foi desenhada para operar sempre em 3 fases sequenciais e determinísticas: análise, auditoria e refatoração. O `SKILL.md` impõe a ordem das fases, o formato exato de saída da Fase 1, o template literal da Fase 2, a pausa obrigatória antes de qualquer mutação e as validações mínimas para considerar a execução válida.
+
+### Estrutura do SKILL.md
+
+O arquivo principal centraliza o contrato de execução:
+
+- Fase 1 detecta linguagem, framework, dependências, domínio, arquitetura, arquivos executáveis e tabelas do banco.
+- Fase 2 cruza o código com um catálogo explícito de anti-patterns, exige no mínimo 5 findings e força alinhamento com a análise manual do `README.md`.
+- Fase 3 só pode começar após confirmação humana e deve preservar boot, rotas e comportamento funcional do projeto atual.
+
+### Arquivos de Referência
+
+Os arquivos em `.codex/skills/refactor-arch/references/` foram separados por responsabilidade:
+
+- `analysis.md`: heurísticas de detecção de stack, arquitetura e contagem correta de arquivos-fonte.
+- `anti-patterns.md`: catálogo de sinais, severidades e exemplos de overlap esperados para cada projeto.
+- `report-template.md`: contrato literal do relatório da Fase 2, incluindo cabeçalho, tabela resumo, findings e footer.
+- `mvc-guidelines.md`: definição do alvo arquitetural com direção de dependências `Routes -> Controllers -> Models/Repositories`.
+- `refactoring-playbook.md`: transformações concretas para remover hardcoded config, SQL concatenado, N+1, duplicação e acoplamento excessivo.
+- `readme-update.md`: regras para sincronizar este `README.md` sem sobrescrever conteúdo útil e sem inventar evidências não verificadas.
+
+### Catálogo de Anti-Patterns
+
+A skill cobre principalmente:
+
+- segredos hardcoded e configuração insegura
+- SQL injection, execução arbitrária de SQL e concatenação de query
+- ausência de separação de camadas e falta de service layer
+- estado global mutável
+- N+1 query pattern
+- duplicação de validação e serialização
+- magic strings, magic numbers e inconsistências de nomenclatura
+- uso de APIs obsoletas quando aplicável
+
+Essas famílias foram escolhidas porque aparecem nos 3 projetos-alvo e representam problemas de segurança, arquitetura e manutenção que o desafio pede para detectar e corrigir.
+
+### Estratégia Agnóstica de Tecnologia
+
+A skill evita depender de nomes de arquivos ou convenções específicas de Flask ou Express. A análise parte de sinais observáveis no código e nos manifests do projeto atual, depois adapta o playbook para a maturidade da base:
+
+- no `code-smells-project`, a refatoração foi mais estrutural por se tratar de um monólito
+- no `task-manager-api`, a expectativa é preservar mais da organização existente
+- no `ecommerce-api-legacy`, a mesma lógica de severidade e separação de responsabilidades continua válida, mesmo com Node.js/Express
+
+### Salvaguardas e Compliance
+
+Foram implementadas salvaguardas específicas para o desafio:
+
+- escopo de execução restrito ao projeto atual por invocação
+- persistência do relatório apenas em `reports/audit-project-<N>.md` na raiz do repositório
+- alinhamento obrigatório com a seção `## Análise Manual dos Projetos`
+- bloqueio da Fase 3 até resposta explícita `y` ou `yes`
+- atualização incremental deste `README.md`, preservando seções concretas já existentes
+
+### Desafios Encontrados
+
+Os principais desafios foram manter a saída da Fase 2 estritamente aderente ao template, garantir overlap real com a análise manual sem inventar findings e refatorar o projeto 1 para MVC sem quebrar as rotas já existentes. Também foi necessário validar a refatoração contra o estado real do banco SQLite presente no repositório, em vez de assumir apenas o cenário de seed inicial.
 
 ## Resultados
 
-Descreva aqui o resumo dos relatórios gerados, a comparação antes/depois das estruturas dos projetos e o checklist de validação preenchido para cada execução.
+### Projeto 1 - code-smells-project
+
+#### Resumo da Auditoria
+
+Relatório salvo em `reports/audit-project-1.md`.
+
+- CRITICAL: 2
+- HIGH: 2
+- MEDIUM: 2
+- LOW: 3
+- Total: 9 findings
+
+#### Antes e Depois
+
+Antes:
+- `app.py` concentrava registro de rotas, configuração sensível e endpoints administrativos inseguros.
+- `controllers.py` misturava HTTP, validação, orquestração de pedidos e side effects.
+- `models.py` concentrava acesso ao SQLite com concatenação de SQL e hidratação N+1.
+- `database.py` mantinha conexão global mutável.
+
+Depois:
+- `src/config/` centraliza settings e ciclo de vida do banco.
+- `src/routes/` faz apenas o binding HTTP.
+- `src/controllers/` concentra a orquestração dos casos de uso.
+- `src/services/` isola o workflow de pedidos.
+- `src/models/` encapsula queries e serialização.
+- `src/middlewares/error_handler.py` centraliza respostas de erro.
+
+#### Checklist de Validação
+
+- [x] Estrutura MVC criada em `src/config`, `src/routes`, `src/controllers`, `src/services`, `src/models` e `src/middlewares`
+- [x] Configuração sensível removida do código-fonte e lida a partir de ambiente/config
+- [x] Endpoint inseguro de SQL arbitrário deixou de executar SQL livre; agora exige token administrativo e allowlist read-only
+- [x] Queries principais migradas para parâmetros em vez de concatenação de strings
+- [x] Hidratação de pedidos deixou de usar N+1 para buscar itens e nomes de produtos
+- [x] Validação duplicada de produto foi consolidada em `src/utils/validators.py`
+- [x] `python app.py` inicia sem erro
+- [x] Endpoints principais respondem após a refatoração
+- [ ] Todos os endpoints do projeto foram exercitados manualmente nesta execução
+
+#### Evidências
+
+Evidências verificadas nesta execução:
+
+- `venv\Scripts\python.exe app.py` permaneceu em execução após o boot, confirmando que o entrypoint real sobe sem erro.
+- Via `Flask.test_client()`, os endpoints `GET /`, `GET /health`, `GET /produtos`, `POST /login`, `POST /pedidos`, `GET /pedidos` e `GET /relatorios/vendas` responderam com sucesso.
+- `POST /admin/query` retornou `403`, confirmando que o endpoint administrativo não executa mais SQL arbitrário sem autenticação.
+- O endpoint `/health` continua funcional, mas não expõe mais `secret_key` nem `db_path`.
+
+#### Observações
+
+Este projeto exigiu refatoração mais profunda do que os demais porque a base original era essencialmente monolítica. Para preservar compatibilidade, os arquivos-raiz (`app.py`, `models.py`, `database.py` e `controllers.py`) foram mantidos como entrypoints ou wrappers finos enquanto a implementação real passou para `src/`.
+
+### Projeto 2 - ecommerce-api-legacy
+
+#### Resumo da Auditoria
+
+Ainda não executado nesta fase do desafio.
+
+#### Antes e Depois
+
+Pendente.
+
+#### Checklist de Validação
+
+- [ ] Auditoria executada
+- [ ] Refatoração executada
+- [ ] Aplicação validada
+
+#### Evidências
+
+Sem evidências nesta execução.
+
+#### Observações
+
+Subseção reservada para atualização incremental na execução do projeto 2.
+
+### Projeto 3 - task-manager-api
+
+#### Resumo da Auditoria
+
+Ainda não executado nesta fase do desafio.
+
+#### Antes e Depois
+
+Pendente.
+
+#### Checklist de Validação
+
+- [ ] Auditoria executada
+- [ ] Refatoração executada
+- [ ] Aplicação validada
+
+#### Evidências
+
+Sem evidências nesta execução.
+
+#### Observações
+
+Subseção reservada para atualização incremental na execução do projeto 3.
 
 ## Como Executar
 
-Descreva aqui os pré-requisitos, os comandos para invocar a skill em cada projeto e como validar que a refatoração funcionou.
+### Pré-requisitos
+
+- Codex, Claude Code ou Gemini CLI com suporte a skills/comandos equivalentes
+- Python para os projetos Flask e Node.js para o projeto Express
+- Dependências instaladas em cada projeto antes da execução
+
+Para o projeto 1:
+
+```bash
+cd code-smells-project
+pip install -r requirements.txt
+```
+
+### Execução por Projeto
+
+Exemplos com a invocação usada neste repositório:
+
+```bash
+# Projeto 1
+cd code-smells-project
+/refactor-arch
+
+# Projeto 2
+cd ../ecommerce-api-legacy
+/refactor-arch
+
+# Projeto 3
+cd ../task-manager-api
+/refactor-arch
+```
+
+Se estiver usando outra ferramenta, substitua a forma de invocação da skill, mas mantenha o mesmo escopo: um projeto por vez.
+
+### Relatórios Gerados
+
+Os relatórios da Fase 2 devem ser salvos na raiz do repositório:
+
+- `reports/audit-project-1.md`
+- `reports/audit-project-2.md`
+- `reports/audit-project-3.md`
+
+### Como Validar
+
+Após a Fase 3, valide sempre:
+
+```bash
+# Projeto 1
+cd code-smells-project
+python app.py
+
+# Projeto 2
+cd ../ecommerce-api-legacy
+npm start
+
+# Projeto 3
+cd ../task-manager-api
+python app.py
+```
+
+Além do boot, exercite endpoints principais do projeto atual. No projeto 1, esta execução validou `GET /`, `GET /health`, `GET /produtos`, `POST /login`, `POST /pedidos`, `GET /pedidos` e `GET /relatorios/vendas`.
 
 ### Ordem de execução sugerida
 
