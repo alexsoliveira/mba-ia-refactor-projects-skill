@@ -826,25 +826,51 @@ Este projeto exigiu uma refatoracao intermediaria: a API continuou pequena, mas 
 
 #### Resumo da Auditoria
 
-Ainda não executado nesta fase do desafio.
+Relatório salvo em `reports/audit-project-3.md`.
+
+- CRITICAL: 2
+- HIGH: 3
+- MEDIUM: 2
+- LOW: 2
+- Total: 9 findings
 
 #### Antes e Depois
 
-Pendente.
+Antes:
+- `app.py` concentrava configuração sensível e bootstrap direto da aplicação.
+- As rotas em `routes/` acumulavam validação, serialização, consultas ORM e regras de agregação.
+- `models/user.py` ainda gravava senha com MD5 e `services/notification_service.py` expunha credenciais SMTP hardcoded.
+
+Depois:
+- `config/settings.py` centraliza configuração de aplicação e segredos passam a vir de ambiente.
+- `controllers/` concentra a orquestração dos casos de uso, deixando `routes/` apenas como camada HTTP.
+- `models/` passaram a encapsular serialização reutilizável e hashing moderno com compatibilidade temporária para hashes legados.
+- `services/notification_service.py` usa configuração centralizada e envio assíncrono para não bloquear o fluxo principal.
 
 #### Checklist de Validação
 
-- [ ] Auditoria executada
-- [ ] Refatoração executada
-- [ ] Aplicação validada
+- [x] Auditoria executada e persistida em `reports/audit-project-3.md`
+- [x] Refatoração executada com separação adicional entre routes, controllers, models e config
+- [x] Configuração sensível removida do fluxo principal e lida a partir de ambiente/config
+- [x] Hash de senha novo migrado para Werkzeug com fallback para hashes MD5 legados do banco local
+- [x] Listagem de tasks deixou de fazer enriquecimento N+1 via `Query.get` em loop
+- [x] Uso de `Query.get` removido dos handlers refatorados em favor de `db.session.get(...)`
+- [x] `python app.py` sobe sem erro e responde em `/health`
+- [x] Endpoints principais respondem após a refatoração
+- [ ] Todos os endpoints do projeto foram exercitados manualmente nesta execução
 
 #### Evidências
 
-Sem evidências nesta execução.
+Evidências verificadas nesta execução:
+
+- `venv\Scripts\python.exe app.py` subiu com sucesso e `GET http://127.0.0.1:5000/health` respondeu `200`.
+- Via `Flask.test_client()`, os endpoints `GET /`, `GET /health`, `GET /tasks`, `GET /tasks/stats`, `GET /reports/summary` e `GET /categories` responderam `200`.
+- `POST /login` com `joao@email.com` e senha `1234` continuou funcionando sobre o banco já existente, validando a compatibilidade temporária com hashes MD5 legados.
+- A resposta de `GET /tasks` passou a incluir `user_name`, `category_name` e `overdue` sem consultas adicionais por item na rota.
 
 #### Observações
 
-Subseção reservada para atualização incremental na execução do projeto 3.
+Este projeto já tinha alguma separação física por pastas, então a Fase 3 foi menos estrutural do que no projeto 1. O foco foi reduzir vazamento de responsabilidade entre camadas, corrigir riscos de segurança e preservar os mesmos caminhos de endpoint sem introduzir dependências novas.
 
 ## Como Executar
 
