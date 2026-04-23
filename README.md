@@ -774,25 +774,53 @@ Este projeto exigiu refatoração mais profunda do que os demais porque a base o
 
 #### Resumo da Auditoria
 
-Ainda não executado nesta fase do desafio.
+Relatorio salvo em `reports/audit-project-2.md`.
+
+- CRITICAL: 3
+- HIGH: 2
+- MEDIUM: 2
+- LOW: 2
+- Total: 9 findings
 
 #### Antes e Depois
 
-Pendente.
+Antes:
+- `src/AppManager.js` concentrava rotas, regra de checkout, relatorio financeiro e acesso direto ao SQLite.
+- `src/utils.js` mantinha credenciais sensiveis hardcoded, pseudo-criptografia e estado global mutavel.
+- O banco era criado em memoria no construtor, reinicializando toda a aplicacao a cada boot.
+
+Depois:
+- `src/app.js` virou composition root com boot explicito, JSON middleware e tratamento centralizado de erros.
+- `src/config/` concentra settings e o ciclo de vida do SQLite persistido em `data/ecommerce.sqlite`.
+- `src/routes/` faz apenas o binding HTTP, enquanto `src/controllers/` e `src/services/` orquestram checkout e relatorios.
+- `src/models/` encapsula leitura e escrita no banco, incluindo a consulta consolidada do relatorio financeiro.
+- `src/utils.js` passou a expor wrappers seguros e deixou de armazenar segredos ou estado global compartilhado.
 
 #### Checklist de Validação
 
-- [ ] Auditoria executada
-- [ ] Refatoração executada
-- [ ] Aplicação validada
+- [x] Estrutura MVC criada em `src/config`, `src/routes`, `src/controllers`, `src/services`, `src/models` e `src/middlewares`
+- [x] Configuracao sensivel removida do codigo-fonte e lida a partir de ambiente/config
+- [x] Hash de senha legado substituido por `crypto.pbkdf2Sync`
+- [x] Endpoint administrativo agora exige `x-admin-token`
+- [x] Relatorio financeiro deixou de usar consultas N+1 por matricula e pagamento
+- [x] Estado global mutavel foi removido da implementacao principal
+- [x] `npm start` sobe a aplicacao sem erro
+- [x] Endpoints principais respondem apos a refatoracao
+- [ ] Todos os endpoints do projeto foram exercitados manualmente nesta execucao
 
 #### Evidências
 
-Sem evidências nesta execução.
+Evidencias verificadas nesta execucao:
+
+- `node src/app.js` permaneceu em execucao e exibiu `Frankenstein LMS rodando na porta 3000...`.
+- `POST /api/checkout` com cartao iniciado por `4` retornou `200` com `{"msg":"Sucesso","enrollment_id":2}`.
+- `POST /api/checkout` com cartao iniciado por `5` retornou `400`, preservando o fluxo de pagamento recusado.
+- `GET /api/admin/financial-report` retornou `403` sem token e respondeu com sucesso quando enviado `x-admin-token: dev-admin-token`.
+- `DELETE /api/users/1` continuou respondendo com a mensagem legada de remocao do usuario.
 
 #### Observações
 
-Subseção reservada para atualização incremental na execução do projeto 2.
+Este projeto exigiu uma refatoracao intermediaria: a API continuou pequena, mas havia acoplamento forte entre HTTP, regras de negocio e persistencia. A skill migrou o fluxo para camadas MVC sem alterar os caminhos das rotas e usou apenas modulos nativos do Node.js alem das dependencias ja presentes no projeto.
 
 ### Projeto 3 - task-manager-api
 

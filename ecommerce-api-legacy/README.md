@@ -9,6 +9,6 @@ npm install
 npm start
 ```
 
-A aplicação sobe em `http://localhost:3000`. O banco SQLite é em memória e já carrega seeds automaticamente no boot.
+A aplicação sobe em `http://localhost:3000`. O banco SQLite persiste em `data/ecommerce.sqlite`, carrega seeds apenas quando a base ainda está vazia e o endpoint `GET /api/admin/financial-report` exige o header `x-admin-token` (valor padrão local: `dev-admin-token`).
 
 Exemplos de requisições estão em `api.http`.
