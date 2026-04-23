@@ -45,6 +45,7 @@ References:
   - When those sections still contain placeholder text such as `Descreva aqui`, Phase 3 must replace the placeholders with real repository-specific documentation.
   - Preserve the existing `## Análise Manual dos Projetos` content and do not overwrite unrelated sections.
   - Update shared README sections incrementally across runs: merge with existing content, do not duplicate headings, and only add or refresh the current project's result/checklist subsection when working on a single project.
+  - In `## Resultados`, the current project's subsection is also considered pending if it still contains boilerplate such as `Ainda não executado nesta fase do desafio.`, `Pendente.`, `Sem evidências nesta execução.`, or `Subseção reservada para atualização incremental ...`.
 - No preamble before Phase 1 template output.
 - Use exact Phase 1 field order and labels.
 - No narrative text between the end of Phase 1 and the start of Phase 2.
@@ -342,6 +343,7 @@ Validation checklist:
 - Original endpoints still respond.
 - No refactor step started before Phase 2 confirmation.
 - Root `README.md` no longer contains unresolved placeholder text in the sections covered by the current run.
+- The current project's subsection inside `## Resultados` no longer contains execution-placeholder text.
 
 README synchronization requirements (mandatory during Phase 3 for this challenge repo):
 - Resolve the repository root README as the `README.md` that sits beside `AGENTS.md`.
@@ -351,9 +353,11 @@ README synchronization requirements (mandatory during Phase 3 for this challenge
   - `## Como Executar`
 - Preserve user-authored content that is already concrete; replace only placeholders, stale boilerplate, or the subsection for the current project when refreshed evidence is available.
 - In `## Resultados`, maintain per-project subsections and update only the current project's audit summary, before/after structure notes, validation checklist, and evidence/log summary for the invoked target project.
+- For the current project's subsection in `## Resultados`, replace placeholder bodies under `#### Resumo da Auditoria`, `#### Antes e Depois`, `#### Checklist de Validação`, `#### Evidências`, and `#### Observações` when they still say the project was not executed or remain generic boilerplate.
 - In `## Como Executar`, keep commands for all 3 projects available once the section is populated; do not narrow the README to only the current project.
 - Do not claim validation that was not actually executed during the current run; when evidence comes from the current run, state it concretely.
 - If Phase 3 validation fails, do not mark checklist items as complete in `README.md`.
+- If the current project's subsection in `## Resultados` still contains `Ainda não executado`, `Pendente`, `Sem evidências nesta execução`, or `Subseção reservada`, Phase 3 is not complete.
 
 ## Safety Gate
 

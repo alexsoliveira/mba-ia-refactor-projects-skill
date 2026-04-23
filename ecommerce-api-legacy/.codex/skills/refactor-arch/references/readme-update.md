@@ -20,6 +20,11 @@ Do not remove or rewrite the existing `## Análise Manual dos Projetos` section 
 - Merge incrementally across runs; do not duplicate headings or create parallel copies of the same section.
 - Because each invocation is single-project scoped, update the current project's subsection in `## Resultados` and preserve the other projects' subsections when they already exist.
 - If a shared section is still empty or placeholder-only, populate it with repository-level guidance that applies to all projects.
+- Treat these strings as placeholders for the current project's subsection in `## Resultados` and replace them during Phase 3:
+  - `Ainda não executado nesta fase do desafio.`
+  - `Pendente.`
+  - `Sem evidências nesta execução.`
+  - `Subseção reservada para atualização incremental ...`
 
 ## Content Contract
 
@@ -51,6 +56,7 @@ For the current project, include:
 - A filled validation checklist for the current project based only on evidence actually verified.
 - Short evidence/log summary of boot and endpoint checks.
 - Notes on how the skill adapted to this project's architecture maturity.
+- The subsection must replace any pending boilerplate under all five blocks, not just `#### Resumo da Auditoria`.
 
 Recommended subsection headings:
 - `### Projeto 1 - code-smells-project`
@@ -104,6 +110,7 @@ Recommended subsection headings:
 The README update performed in Phase 3 should satisfy all of these:
 - No placeholder text remains in the 3 targeted sections.
 - `## Resultados` contains a subsection for the current project.
+- The current project's subsection in `## Resultados` no longer says the project was not executed and no block remains as `Pendente.` or `Sem evidências nesta execução.`.
 - The current project's checklist reflects real verification status.
 - `## Como Executar` includes commands for all 3 projects.
 - The section content matches the actual structure and reports present in the repository.
